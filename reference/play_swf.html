@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=550, initial-scale=1" />
+    <title>Gravity Arcade SWF Reference</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        min-height: 100%;
+        background: #111;
+      }
+
+      #stage {
+        width: 550px;
+        height: 400px;
+      }
+    </style>
+    <script>
+      window.RufflePlayer = window.RufflePlayer || {};
+      window.RufflePlayer.config = {
+        autoplay: "on",
+        unmuteOverlay: "hidden",
+        letterbox: "off",
+        warnOnUnsupportedContent: false
+      };
+    </script>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle@0.3.0"></script>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <script>
+      window.addEventListener("load", () => {
+        const ruffle = window.RufflePlayer.newest();
+        const player = ruffle.createPlayer();
+        player.style.width = "550px";
+        player.style.height = "400px";
+        document.getElementById("stage").appendChild(player);
+        player.load("../gravity_arcade.swf");
+      });
+    </script>
+  </body>
+</html>

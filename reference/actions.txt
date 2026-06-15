@@ -1,0 +1,3067 @@
+{"file_len": 84367, "first_tag_pos": 21, "fps": 30.0, "frames": 58, "signature": "FWS", "stage_px": [0.0, 550.0, 0.0, 400.0], "stage_twips": [0, 11000, 0, 8000], "version": 5}
+
+## sprite 3 frame 1
+0000: Stop
+0001: End
+
+## sprite 8 frame 1
+0000: Stop
+0001: End
+
+## sprite 11 frame 1
+0000: Stop
+0001: End
+
+## sprite 13 frame 1
+0000: Stop
+0001: End
+
+## sprite 15 frame 11
+0000: Push [0.0, '_parent']
+0015: GetVariable
+0016: Push ['removeMovieClip']
+002a: CallMethod
+002b: Pop
+002c: End
+
+## sprite 16 frame 1
+0000: ConstantPool ['absGeschw', 'geschw', 'Math', 'abs', 'ballMaxSpeed', 'reflectMod', 's', '_parent', 'ballE', 'n', 'f', 'gotoAndStop', '', 'scoreoneortwo', 'score1', '_root', 'speedmod', 'VelocityBonus', 'vy', 'vx', 'VelocityMulti', 'scoreEnergyMulti', 'score2', 'speedUp', 'firebonus', 'slope', 'reflect', 'Sound', 'attachSound', 'firebonusMod', 'substr', 'setEnergy', 'ballOwn', 'pl1', 'xmaxBall', '_y', 'v', 'out', 'r', 'xminBall', 'pl2', 'c', 'nextFrame', 'l', 'ball1die', '_currentframe', 'paralised', 'gotoAndPlay', 'firebonusMulti', 'i', 'ballReg', 'length', 'splice', 'ScoreIt', 'flash', 'redline', 'blueWin', 'announce', 'matchesBlue', 'clearPlayfield', 'ball2die', 'blueline', 'matchesRed', 'redWin', 'w', 'gunReady', '_root.w.ball_', 'init', 'vl', 'sqrt']
+0221: DefineFunction Reflektieren(geschw) body_size=173
+  0000: Push ['absGeschw', 'geschw']
+  0007: GetVariable
+  0008: Push [1, 'Math']
+  0012: GetVariable
+  0013: Push ['abs']
+  0018: CallMethod
+  0019: SetVariable
+  001a: Push ['ballMaxSpeed']
+  001f: GetVariable
+  0020: Push ['geschw']
+  0025: GetVariable
+  0026: Push [1, 'Math']
+  0030: GetVariable
+  0031: Push ['abs']
+  0036: CallMethod
+  0037: Less2
+  0038: Not
+  0039: If -> 140
+  003e: Push [0.0, 'geschw']
+  004c: GetVariable
+  004d: Less2
+  004e: Not
+  004f: If -> 117
+  0054: Push ['geschw', 0.0, 'ballMaxSpeed']
+  0064: GetVariable
+  0065: Push [1]
+  006d: Add2
+  006e: Subtract
+  006f: SetVariable
+  0070: Jump -> 135
+  0075: Push ['geschw', 'ballMaxSpeed']
+  007c: GetVariable
+  007d: Push [1]
+  0085: Add2
+  0086: SetVariable
+  0087: Jump -> 166
+  008c: Push ['geschw', 'geschw']
+  0093: GetVariable
+  0094: Push [0.0, 'reflectMod']
+  00a2: GetVariable
+  00a3: Subtract
+  00a4: Multiply
+  00a5: SetVariable
+  00a6: Push ['geschw']
+  00ab: GetVariable
+  00ac: Return
+02e9: DefineFunction setEnergy() body_size=120
+  0000: Push ['s', '_parent']
+  0007: GetVariable
+  0008: Push ['ballE']
+  000d: GetMember
+  000e: Push ['n']
+  0013: GetVariable
+  0014: GetMember
+  0015: Push [8]
+  001d: Divide
+  001e: Push [30]
+  0026: Add2
+  0027: SetVariable
+  0028: Push [100, 's']
+  0032: GetVariable
+  0033: Less2
+  0034: Not
+  0035: If -> 92
+  003a: Push ['s', 100]
+  0044: SetVariable
+  0045: Push [2, 1, 'f']
+  0054: GetVariable
+  0055: Push ['gotoAndStop']
+  005a: CallMethod
+  005b: Pop
+  005c: Push ['', 2, 's']
+  0068: GetVariable
+  0069: SetProperty
+  006a: Push ['', 3, 's']
+  0076: GetVariable
+  0077: SetProperty
+0372: DefineFunction ScoreIt(scoreoneortwo) body_size=377
+  0000: Push ['scoreoneortwo']
+  0005: GetVariable
+  0006: Push ['score1']
+  000b: Equals2
+  000c: Not
+  000d: If -> 200
+  0012: Push ['_root']
+  0017: GetVariable
+  0018: Push ['speedmod']
+  001d: GetMember
+  001e: Push [2]
+  0026: Equals2
+  0027: Not
+  0028: If -> 145
+  002d: Push ['VelocityBonus', 'vy']
+  0034: GetVariable
+  0035: Push ['vy']
+  003a: GetVariable
+  003b: Multiply
+  003c: Push ['vx']
+  0041: GetVariable
+  0042: Push ['vx']
+  0047: GetVariable
+  0048: Multiply
+  0049: Add2
+  004a: Push ['VelocityMulti']
+  004f: GetVariable
+  0050: Multiply
+  0051: ToInteger
+  0052: SetVariable
+  0053: Push ['_root']
+  0058: GetVariable
+  0059: Push ['score1', '_root']
+  0060: GetVariable
+  0061: Push ['score1']
+  0066: GetMember
+  0067: ToNumber
+  0068: Push ['_parent']
+  006d: GetVariable
+  006e: Push ['ballE']
+  0073: GetMember
+  0074: Push ['n']
+  0079: GetVariable
+  007a: GetMember
+  007b: Push ['scoreEnergyMulti']
+  0080: GetVariable
+  0081: Divide
+  0082: ToInteger
+  0083: Add2
+  0084: Push ['VelocityBonus']
+  0089: GetVariable
+  008a: Add2
+  008b: SetMember
+  008c: Jump -> 195
+  0091: Push ['_root']
+  0096: GetVariable
+  0097: Push ['score1', '_root']
+  009e: GetVariable
+  009f: Push ['score1']
+  00a4: GetMember
+  00a5: ToNumber
+  00a6: Push ['_parent']
+  00ab: GetVariable
+  00ac: Push ['ballE']
+  00b1: GetMember
+  00b2: Push ['n']
+  00b7: GetVariable
+  00b8: GetMember
+  00b9: Push ['scoreEnergyMulti']
+  00be: GetVariable
+  00bf: Divide
+  00c0: ToInteger
+  00c1: Add2
+  00c2: SetMember
+  00c3: Jump -> 377
+  00c8: Push ['_root']
+  00cd: GetVariable
+  00ce: Push ['speedmod']
+  00d3: GetMember
+  00d4: Push [2]
+  00dc: Equals2
+  00dd: Not
+  00de: If -> 327
+  00e3: Push ['VelocityBonus', 'vy']
+  00ea: GetVariable
+  00eb: Push ['vy']
+  00f0: GetVariable
+  00f1: Multiply
+  00f2: Push ['vx']
+  00f7: GetVariable
+  00f8: Push ['vx']
+  00fd: GetVariable
+  00fe: Multiply
+  00ff: Add2
+  0100: Push ['VelocityMulti']
+  0105: GetVariable
+  0106: Multiply
+  0107: ToInteger
+  0108: SetVariable
+  0109: Push ['_root']
+  010e: GetVariable
+  010f: Push ['score2', '_root']
+  0116: GetVariable
+  0117: Push ['score2']
+  011c: GetMember
+  011d: ToNumber
+  011e: Push ['_parent']
+  0123: GetVariable
+  0124: Push ['ballE']
+  0129: GetMember
+  012a: Push ['n']
+  012f: GetVariable
+  0130: GetMember
+  0131: Push ['scoreEnergyMulti']
+  0136: GetVariable
+  0137: Divide
+  0138: ToInteger
+  0139: Add2
+  013a: Push ['VelocityBonus']
+  013f: GetVariable
+  0140: Add2
+  0141: SetMember
+  0142: Jump -> 377
+  0147: Push ['_root']
+  014c: GetVariable
+  014d: Push ['score2', '_root']
+  0154: GetVariable
+  0155: Push ['score2']
+  015a: GetMember
+  015b: ToNumber
+  015c: Push ['_parent']
+  0161: GetVariable
+  0162: Push ['ballE']
+  0167: GetMember
+  0168: Push ['n']
+  016d: GetVariable
+  016e: GetMember
+  016f: Push ['scoreEnergyMulti']
+  0174: GetVariable
+  0175: Divide
+  0176: ToInteger
+  0177: Add2
+  0178: SetMember
+0508: Push ['speedUp', 50]
+0512: SetVariable
+0513: Push ['firebonus', 40]
+051d: SetVariable
+051e: Push ['slope', 50000]
+0528: SetVariable
+0529: Push ['reflect', 0.0, 'Sound']
+0539: NewObject
+053a: SetVariable
+053b: Push ['reflect', 1, 'reflect']
+0547: GetVariable
+0548: Push ['attachSound']
+054d: CallMethod
+054e: Pop
+054f: Push ['VelocityMulti', 0.3]
+055d: SetVariable
+055e: Push ['ballMaxSpeed', 70]
+0568: SetVariable
+0569: Push ['_root']
+056e: GetVariable
+056f: Push ['speedmod']
+0574: GetMember
+0575: Push [1]
+057d: Equals2
+057e: Not
+057f: If -> 1450
+0584: Push ['reflectMod', 1]
+058e: SetVariable
+058f: Push ['firebonusMod', 1]
+0599: SetVariable
+059a: Push ['scoreEnergyMulti', 10]
+05a4: SetVariable
+05a5: Jump -> 1491
+05aa: Push ['reflectMod', 1.15]
+05b8: SetVariable
+05b9: Push ['firebonusMod', 0.2]
+05c7: SetVariable
+05c8: Push ['scoreEnergyMulti', 50]
+05d2: SetVariable
+05d3: Push ['n', '', 13]
+05df: GetProperty
+05e0: SetVariable
+05e1: Push ['n', 5, 1, 'n']
+05f2: GetVariable
+05f3: Push ['substr']
+05f8: CallMethod
+05f9: ToNumber
+05fa: SetVariable
+05fb: Push ['vx', 10]
+0605: SetVariable
+0606: Push [0.0, 'setEnergy']
+0614: CallFunction
+0615: Pop
+0616: Push ['_parent']
+061b: GetVariable
+061c: Push ['ballOwn']
+0621: GetMember
+0622: Push ['n']
+0627: GetVariable
+0628: GetMember
+0629: Push ['pl1']
+062e: Equals2
+062f: Not
+0630: If -> 1733
+0635: Push ['', 0.0, '_parent']
+0645: GetVariable
+0646: Push ['xmaxBall']
+064b: GetMember
+064c: Push [1]
+0654: Subtract
+0655: SetProperty
+0656: Push ['', 1, '_parent']
+0662: GetVariable
+0663: Push ['pl1']
+0668: GetMember
+0669: Push ['_y']
+066e: GetMember
+066f: SetProperty
+0670: Push ['vx', 'vx']
+0677: GetVariable
+0678: Push [-1]
+0680: Multiply
+0681: SetVariable
+0682: Push ['vy', '_parent']
+0689: GetVariable
+068a: Push ['pl1']
+068f: GetMember
+0690: Push ['v']
+0695: GetMember
+0696: Push ['vx']
+069b: GetVariable
+069c: Push [1, 'Math']
+06a6: GetVariable
+06a7: Push ['abs']
+06ac: CallMethod
+06ad: Multiply
+06ae: Push [4]
+06b6: Divide
+06b7: SetVariable
+06b8: Push ['out', 'r']
+06bf: SetVariable
+06c0: Jump -> 1876
+06c5: Push ['', 0.0, '_parent']
+06d5: GetVariable
+06d6: Push ['xminBall']
+06db: GetMember
+06dc: Push [1]
+06e4: Add2
+06e5: SetProperty
+06e6: Push ['', 1, '_parent']
+06f2: GetVariable
+06f3: Push ['pl2']
+06f8: GetMember
+06f9: Push ['_y']
+06fe: GetMember
+06ff: SetProperty
+0700: Push ['vy', '_parent']
+0707: GetVariable
+0708: Push ['pl2']
+070d: GetMember
+070e: Push ['v']
+0713: GetMember
+0714: Push ['vx']
+0719: GetVariable
+071a: Push [1, 'Math']
+0724: GetVariable
+0725: Push ['abs']
+072a: CallMethod
+072b: Multiply
+072c: Push [4]
+0734: Divide
+0735: SetVariable
+0736: Push [0.0, 'c']
+0744: GetVariable
+0745: Push ['nextFrame']
+074a: CallMethod
+074b: Pop
+074c: Push ['out', 'l']
+0753: SetVariable
+0754: Push ['ball1die']
+0759: DefineFunction <anonymous>() body_size=526
+  0000: Push ['f']
+  0005: GetVariable
+  0006: Push ['_currentframe']
+  000b: GetMember
+  000c: Push [1]
+  0014: Equals2
+  0015: Not
+  0016: Not
+  0017: If -> 116
+  001c: Push ['_parent']
+  0021: GetVariable
+  0022: Push ['pl2']
+  0027: GetMember
+  0028: Push ['v', 0.0]
+  0036: SetMember
+  0037: Push ['paralised', 1, '_parent']
+  0043: GetVariable
+  0044: Push ['pl2']
+  0049: GetMember
+  004a: Push ['gotoAndPlay']
+  004f: CallMethod
+  0050: Pop
+  0051: Push ['_root']
+  0056: GetVariable
+  0057: Push ['score1', '_root']
+  005e: GetVariable
+  005f: Push ['score1']
+  0064: GetMember
+  0065: Push ['firebonus']
+  006a: GetVariable
+  006b: Push ['firebonusMulti']
+  0070: GetVariable
+  0071: Multiply
+  0072: Add2
+  0073: SetMember
+  0074: Push ['i', 0.0]
+  0082: SetVariable
+  0083: Push ['i']
+  0088: GetVariable
+  0089: Push ['_parent']
+  008e: GetVariable
+  008f: Push ['ballReg']
+  0094: GetMember
+  0095: Push ['length']
+  009a: GetMember
+  009b: Less2
+  009c: Not
+  009d: If -> 249
+  00a2: Push ['_parent']
+  00a7: GetVariable
+  00a8: Push ['ballReg']
+  00ad: GetMember
+  00ae: Push ['i']
+  00b3: GetVariable
+  00b4: GetMember
+  00b5: Push ['n']
+  00ba: GetVariable
+  00bb: Equals2
+  00bc: Not
+  00bd: If -> 234
+  00c2: Push [1, 'i']
+  00cc: GetVariable
+  00cd: Push [2, '_parent']
+  00d7: GetVariable
+  00d8: Push ['ballReg']
+  00dd: GetMember
+  00de: Push ['splice']
+  00e3: CallMethod
+  00e4: Pop
+  00e5: Jump -> 249
+  00ea: Push ['i', 'i']
+  00f1: GetVariable
+  00f2: Increment
+  00f3: SetVariable
+  00f4: Jump -> 131
+  00f9: Push ['score1', 1, 'ScoreIt']
+  0105: CallFunction
+  0106: Pop
+  0107: Push ['flash', 1, '_parent']
+  0113: GetVariable
+  0114: Push ['redline']
+  0119: GetMember
+  011a: Push ['gotoAndPlay']
+  011f: CallMethod
+  0120: Pop
+  0121: SetTarget target='_parent.scoreLeft'
+  0136: Push ['f', '_root']
+  013d: GetVariable
+  013e: Push ['score1']
+  0143: GetMember
+  0144: Push [10]
+  014c: Divide
+  014d: ToInteger
+  014e: Push [1]
+  0156: Add2
+  0157: SetVariable
+  0158: Push [71, 'f']
+  0162: GetVariable
+  0163: Less2
+  0164: Not
+  0165: If -> 373
+  016a: Push ['f', 71]
+  0174: SetVariable
+  0175: Push ['f']
+  017a: GetVariable
+  017b: GotoFrame2 play=False
+  017f: SetTarget target=''
+  0183: Push ['f', '_root']
+  018a: GetVariable
+  018b: Push ['score1']
+  0190: GetMember
+  0191: Push [10]
+  0199: Divide
+  019a: ToInteger
+  019b: Push [1]
+  01a3: Add2
+  01a4: SetVariable
+  01a5: Push [71, 'f']
+  01af: GetVariable
+  01b0: Less2
+  01b1: Not
+  01b2: If -> 520
+  01b7: Push ['f', 71]
+  01c1: SetVariable
+  01c2: Push ['blueWin', 1, '_root']
+  01ce: GetVariable
+  01cf: Push ['announce']
+  01d4: GetMember
+  01d5: Push ['gotoAndPlay']
+  01da: CallMethod
+  01db: Pop
+  01dc: Push [0.0, '_root']
+  01ea: GetVariable
+  01eb: Push ['matchesBlue']
+  01f0: GetMember
+  01f1: Push ['nextFrame']
+  01f6: CallMethod
+  01f7: Pop
+  01f8: Push [0.0, 'clearPlayfield']
+  0206: CallFunction
+  0207: Pop
+  0208: GotoFrame frame=3
+  020d: Play
+096f: SetVariable
+0970: Push ['ball2die']
+0975: DefineFunction <anonymous>() body_size=523
+  0000: Push ['f']
+  0005: GetVariable
+  0006: Push ['_currentframe']
+  000b: GetMember
+  000c: Push [1]
+  0014: Equals2
+  0015: Not
+  0016: Not
+  0017: If -> 116
+  001c: Push ['_parent']
+  0021: GetVariable
+  0022: Push ['pl1']
+  0027: GetMember
+  0028: Push ['v', 0.0]
+  0036: SetMember
+  0037: Push ['paralised', 1, '_parent']
+  0043: GetVariable
+  0044: Push ['pl1']
+  0049: GetMember
+  004a: Push ['gotoAndPlay']
+  004f: CallMethod
+  0050: Pop
+  0051: Push ['_root']
+  0056: GetVariable
+  0057: Push ['score2', '_root']
+  005e: GetVariable
+  005f: Push ['score2']
+  0064: GetMember
+  0065: Push ['firebonus']
+  006a: GetVariable
+  006b: Push ['firebonusMulti']
+  0070: GetVariable
+  0071: Multiply
+  0072: Add2
+  0073: SetMember
+  0074: Push ['i', 0.0]
+  0082: SetVariable
+  0083: Push ['i']
+  0088: GetVariable
+  0089: Push ['_parent']
+  008e: GetVariable
+  008f: Push ['ballReg']
+  0094: GetMember
+  0095: Push ['length']
+  009a: GetMember
+  009b: Less2
+  009c: Not
+  009d: If -> 249
+  00a2: Push ['_parent']
+  00a7: GetVariable
+  00a8: Push ['ballReg']
+  00ad: GetMember
+  00ae: Push ['i']
+  00b3: GetVariable
+  00b4: GetMember
+  00b5: Push ['n']
+  00ba: GetVariable
+  00bb: Equals2
+  00bc: Not
+  00bd: If -> 234
+  00c2: Push [1, 'i']
+  00cc: GetVariable
+  00cd: Push [2, '_parent']
+  00d7: GetVariable
+  00d8: Push ['ballReg']
+  00dd: GetMember
+  00de: Push ['splice']
+  00e3: CallMethod
+  00e4: Pop
+  00e5: Jump -> 249
+  00ea: Push ['i', 'i']
+  00f1: GetVariable
+  00f2: Increment
+  00f3: SetVariable
+  00f4: Jump -> 131
+  00f9: Push ['score2', 1, 'ScoreIt']
+  0105: CallFunction
+  0106: Pop
+  0107: Push ['flash', 1, '_parent']
+  0113: GetVariable
+  0114: Push ['blueline']
+  0119: GetMember
+  011a: Push ['gotoAndPlay']
+  011f: CallMethod
+  0120: Pop
+  0121: SetTarget target='_parent.score2'
+  0133: Push ['f', '_root']
+  013a: GetVariable
+  013b: Push ['score2']
+  0140: GetMember
+  0141: Push [10]
+  0149: Divide
+  014a: ToInteger
+  014b: Push [1]
+  0153: Add2
+  0154: SetVariable
+  0155: Push [71, 'f']
+  015f: GetVariable
+  0160: Less2
+  0161: Not
+  0162: If -> 370
+  0167: Push ['f', 71]
+  0171: SetVariable
+  0172: Push ['f']
+  0177: GetVariable
+  0178: GotoFrame2 play=False
+  017c: SetTarget target=''
+  0180: Push ['f', '_root']
+  0187: GetVariable
+  0188: Push ['score2']
+  018d: GetMember
+  018e: Push [10]
+  0196: Divide
+  0197: ToInteger
+  0198: Push [1]
+  01a0: Add2
+  01a1: SetVariable
+  01a2: Push [71, 'f']
+  01ac: GetVariable
+  01ad: Less2
+  01ae: Not
+  01af: If -> 517
+  01b4: Push ['f', 71]
+  01be: SetVariable
+  01bf: Push [0.0, '_root']
+  01cd: GetVariable
+  01ce: Push ['matchesRed']
+  01d3: GetMember
+  01d4: Push ['nextFrame']
+  01d9: CallMethod
+  01da: Pop
+  01db: Push ['redWin', 1, '_root']
+  01e7: GetVariable
+  01e8: Push ['announce']
+  01ed: GetMember
+  01ee: Push ['gotoAndPlay']
+  01f3: CallMethod
+  01f4: Pop
+  01f5: Push [0.0, 'clearPlayfield']
+  0203: CallFunction
+  0204: Pop
+  0205: GotoFrame frame=3
+  020a: Play
+0b88: SetVariable
+0b89: Push ['clearPlayfield']
+0b8e: DefineFunction <anonymous>() body_size=164
+  0000: Push ['_root']
+  0005: GetVariable
+  0006: Push ['w']
+  000b: GetMember
+  000c: Push ['pl1']
+  0011: GetMember
+  0012: Push ['gunReady', False]
+  0019: SetMember
+  001a: Push ['_root']
+  001f: GetVariable
+  0020: Push ['w']
+  0025: GetMember
+  0026: Push ['pl2']
+  002b: GetMember
+  002c: Push ['gunReady', False]
+  0033: SetMember
+  0034: Push ['i', 0.0]
+  0042: DefineLocal
+  0043: Push ['i']
+  0048: GetVariable
+  0049: Push ['_parent']
+  004e: GetVariable
+  004f: Push ['ballReg']
+  0054: GetMember
+  0055: Push ['length']
+  005a: GetMember
+  005b: Less2
+  005c: Not
+  005d: If -> 136
+  0062: Push ['_root.w.ball_', '_parent']
+  0069: GetVariable
+  006a: Push ['ballReg']
+  006f: GetMember
+  0070: Push ['i']
+  0075: GetVariable
+  0076: GetMember
+  0077: Add2
+  0078: RemoveSprite
+  0079: Push ['i', 'i']
+  0080: GetVariable
+  0081: Increment
+  0082: SetVariable
+  0083: Jump -> 67
+  0088: Push [0.0, '_root']
+  0096: GetVariable
+  0097: Push ['w']
+  009c: GetMember
+  009d: Push ['init']
+  00a2: CallMethod
+  00a3: Pop
+0c3a: SetVariable
+0c3b: Push ['vl', 'vx']
+0c42: GetVariable
+0c43: Push ['vx']
+0c48: GetVariable
+0c49: Multiply
+0c4a: Push ['vy']
+0c4f: GetVariable
+0c50: Push ['vy']
+0c55: GetVariable
+0c56: Multiply
+0c57: Add2
+0c58: Push [1, 'Math']
+0c62: GetVariable
+0c63: Push ['sqrt']
+0c68: CallMethod
+0c69: SetVariable
+0c6a: Push ['v', '_parent']
+0c71: GetVariable
+0c72: Push ['ballE']
+0c77: GetMember
+0c78: Push ['n']
+0c7d: GetVariable
+0c7e: GetMember
+0c7f: Push [20]
+0c87: Divide
+0c88: SetVariable
+0c89: Push ['vy', 'vy']
+0c90: GetVariable
+0c91: Push ['vl']
+0c96: GetVariable
+0c97: Divide
+0c98: SetVariable
+0c99: Push ['vy', 'vy']
+0ca0: GetVariable
+0ca1: Push ['v']
+0ca6: GetVariable
+0ca7: Multiply
+0ca8: SetVariable
+0ca9: Push ['vx', 'vx']
+0cb0: GetVariable
+0cb1: Push ['vl']
+0cb6: GetVariable
+0cb7: Divide
+0cb8: SetVariable
+0cb9: Push ['vx', 'vx']
+0cc0: GetVariable
+0cc1: Push ['v']
+0cc6: GetVariable
+0cc7: Multiply
+0cc8: SetVariable
+0cc9: End
+
+## sprite 16 label 'move' frame 2
+
+## sprite 16 frame 2
+0000: ConstantPool ['tx', '', 'vx', 'ty', 'vy', 'f', '_currentframe', 'slope', '_parent', 'yminBall', 'reflect', 'start', 'ymaxBall', 'xminBall', 'pl2', 'paddleSize', '_y', 'Math', 'abs', 'invulnerable', 'Reflektieren', 'c', 'gotoAndStop', 'v', 'ball1die', 'xmaxBall', 'pl1', 'ball2die']
+00bd: Push ['tx', '', 0.0]
+00cd: GetProperty
+00ce: Push ['vx']
+00d3: GetVariable
+00d4: Add2
+00d5: SetVariable
+00d6: Push ['ty', '', 1]
+00e2: GetProperty
+00e3: Push ['vy']
+00e8: GetVariable
+00e9: Add2
+00ea: SetVariable
+00eb: Push ['f']
+00f0: GetVariable
+00f1: Push ['_currentframe']
+00f6: GetMember
+00f7: Push [2]
+00ff: Equals2
+0100: Not
+0101: If -> 294
+0106: Push ['vx', 'vx']
+010d: GetVariable
+010e: Push ['', 0.0]
+011c: GetProperty
+011d: Push ['slope']
+0122: GetVariable
+0123: Divide
+0124: Add2
+0125: SetVariable
+0126: Push ['ty']
+012b: GetVariable
+012c: Push ['_parent']
+0131: GetVariable
+0132: Push ['yminBall']
+0137: GetMember
+0138: Less2
+0139: Not
+013a: If -> 388
+013f: Push ['ty', 2, '_parent']
+014b: GetVariable
+014c: Push ['yminBall']
+0151: GetMember
+0152: Multiply
+0153: Push ['ty']
+0158: GetVariable
+0159: Subtract
+015a: SetVariable
+015b: Push ['vy', 0.0, 'vy']
+016b: GetVariable
+016c: Subtract
+016d: SetVariable
+016e: Push [0.0, 'reflect']
+017c: GetVariable
+017d: Push ['start']
+0182: CallMethod
+0183: Pop
+0184: Push ['_parent']
+0189: GetVariable
+018a: Push ['ymaxBall']
+018f: GetMember
+0190: Push ['ty']
+0195: GetVariable
+0196: Less2
+0197: Not
+0198: If -> 482
+019d: Push ['ty', 2, '_parent']
+01a9: GetVariable
+01aa: Push ['ymaxBall']
+01af: GetMember
+01b0: Multiply
+01b1: Push ['ty']
+01b6: GetVariable
+01b7: Subtract
+01b8: SetVariable
+01b9: Push ['vy', 0.0, 'vy']
+01c9: GetVariable
+01ca: Subtract
+01cb: SetVariable
+01cc: Push [0.0, 'reflect']
+01da: GetVariable
+01db: Push ['start']
+01e0: CallMethod
+01e1: Pop
+01e2: Push ['tx']
+01e7: GetVariable
+01e8: Push ['_parent']
+01ed: GetVariable
+01ee: Push ['xminBall']
+01f3: GetMember
+01f4: Less2
+01f5: Not
+01f6: If -> 867
+01fb: Push ['_parent']
+0200: GetVariable
+0201: Push ['pl2']
+0206: GetMember
+0207: Push ['paddleSize']
+020c: GetMember
+020d: Push ['ty']
+0212: GetVariable
+0213: Push ['_parent']
+0218: GetVariable
+0219: Push ['pl2']
+021e: GetMember
+021f: Push ['_y']
+0224: GetMember
+0225: Subtract
+0226: Push [1, 'Math']
+0230: GetVariable
+0231: Push ['abs']
+0236: CallMethod
+0237: Less2
+0238: Not
+0239: PushDuplicate
+023a: If -> 643
+023f: Pop
+0240: Push ['_parent']
+0245: GetVariable
+0246: Push ['pl2']
+024b: GetMember
+024c: Push ['paddleSize']
+0251: GetMember
+0252: Push ['', 1]
+025c: GetProperty
+025d: Push ['_parent']
+0262: GetVariable
+0263: Push ['pl2']
+0268: GetMember
+0269: Push ['_y']
+026e: GetMember
+026f: Subtract
+0270: Push [1, 'Math']
+027a: GetVariable
+027b: Push ['abs']
+0280: CallMethod
+0281: Less2
+0282: Not
+0283: PushDuplicate
+0284: If -> 674
+0289: Pop
+028a: Push ['_parent']
+028f: GetVariable
+0290: Push ['pl2']
+0295: GetMember
+0296: Push ['invulnerable']
+029b: GetMember
+029c: Push [True]
+02a1: Equals2
+02a2: PushDuplicate
+02a3: Not
+02a4: If -> 703
+02a9: Pop
+02aa: Push ['f']
+02af: GetVariable
+02b0: Push ['_currentframe']
+02b5: GetMember
+02b6: Push [1]
+02be: Equals2
+02bf: Not
+02c0: If -> 851
+02c5: Push ['tx', 2, '_parent']
+02d1: GetVariable
+02d2: Push ['xminBall']
+02d7: GetMember
+02d8: Multiply
+02d9: Push ['tx']
+02de: GetVariable
+02df: Subtract
+02e0: SetVariable
+02e1: Push ['vx', 'vx']
+02e8: GetVariable
+02e9: Push [1, 'Reflektieren']
+02f3: CallFunction
+02f4: SetVariable
+02f5: Push [2, 1, 'c']
+0304: GetVariable
+0305: Push ['gotoAndStop']
+030a: CallMethod
+030b: Pop
+030c: Push ['vy', 'vy']
+0313: GetVariable
+0314: Push ['_parent']
+0319: GetVariable
+031a: Push ['pl2']
+031f: GetMember
+0320: Push ['v']
+0325: GetMember
+0326: Push ['vy']
+032b: GetVariable
+032c: Subtract
+032d: Push [2]
+0335: Divide
+0336: Add2
+0337: SetVariable
+0338: Push [0.0, 'reflect']
+0346: GetVariable
+0347: Push ['start']
+034c: CallMethod
+034d: Pop
+034e: Jump -> 867
+0353: Push [0.0, 'ball1die']
+0361: CallFunction
+0362: Pop
+0363: Push ['_parent']
+0368: GetVariable
+0369: Push ['xmaxBall']
+036e: GetMember
+036f: Push ['tx']
+0374: GetVariable
+0375: Less2
+0376: Not
+0377: If -> 1252
+037c: Push ['_parent']
+0381: GetVariable
+0382: Push ['pl1']
+0387: GetMember
+0388: Push ['paddleSize']
+038d: GetMember
+038e: Push ['ty']
+0393: GetVariable
+0394: Push ['_parent']
+0399: GetVariable
+039a: Push ['pl1']
+039f: GetMember
+03a0: Push ['_y']
+03a5: GetMember
+03a6: Subtract
+03a7: Push [1, 'Math']
+03b1: GetVariable
+03b2: Push ['abs']
+03b7: CallMethod
+03b8: Less2
+03b9: Not
+03ba: PushDuplicate
+03bb: If -> 1028
+03c0: Pop
+03c1: Push ['_parent']
+03c6: GetVariable
+03c7: Push ['pl1']
+03cc: GetMember
+03cd: Push ['paddleSize']
+03d2: GetMember
+03d3: Push ['', 1]
+03dd: GetProperty
+03de: Push ['_parent']
+03e3: GetVariable
+03e4: Push ['pl1']
+03e9: GetMember
+03ea: Push ['_y']
+03ef: GetMember
+03f0: Subtract
+03f1: Push [1, 'Math']
+03fb: GetVariable
+03fc: Push ['abs']
+0401: CallMethod
+0402: Less2
+0403: Not
+0404: PushDuplicate
+0405: If -> 1059
+040a: Pop
+040b: Push ['_parent']
+0410: GetVariable
+0411: Push ['pl1']
+0416: GetMember
+0417: Push ['invulnerable']
+041c: GetMember
+041d: Push [True]
+0422: Equals2
+0423: PushDuplicate
+0424: Not
+0425: If -> 1088
+042a: Pop
+042b: Push ['f']
+0430: GetVariable
+0431: Push ['_currentframe']
+0436: GetMember
+0437: Push [1]
+043f: Equals2
+0440: Not
+0441: If -> 1236
+0446: Push ['tx', 2, '_parent']
+0452: GetVariable
+0453: Push ['xmaxBall']
+0458: GetMember
+0459: Multiply
+045a: Push ['tx']
+045f: GetVariable
+0460: Subtract
+0461: SetVariable
+0462: Push ['vx', 'vx']
+0469: GetVariable
+046a: Push [1, 'Reflektieren']
+0474: CallFunction
+0475: SetVariable
+0476: Push [1, 1, 'c']
+0485: GetVariable
+0486: Push ['gotoAndStop']
+048b: CallMethod
+048c: Pop
+048d: Push ['vy', 'vy']
+0494: GetVariable
+0495: Push ['_parent']
+049a: GetVariable
+049b: Push ['pl1']
+04a0: GetMember
+04a1: Push ['v']
+04a6: GetMember
+04a7: Push ['vy']
+04ac: GetVariable
+04ad: Subtract
+04ae: Push [2]
+04b6: Divide
+04b7: Add2
+04b8: SetVariable
+04b9: Push [0.0, 'reflect']
+04c7: GetVariable
+04c8: Push ['start']
+04cd: CallMethod
+04ce: Pop
+04cf: Jump -> 1252
+04d4: Push [0.0, 'ball2die']
+04e2: CallFunction
+04e3: Pop
+04e4: Push ['', 0.0, 'tx']
+04f4: GetVariable
+04f5: SetProperty
+04f6: Push ['', 1, 'ty']
+0502: GetVariable
+0503: SetProperty
+0504: End
+
+## sprite 16 frame 3
+0000: GotoFrame frame=1
+0005: Play
+0006: End
+
+## sprite 16 label 'die' frame 4
+
+## sprite 16 frame 4
+0000: ConstantPool ['tx', '', 'vx', 'ty', 'vy', 'f', '_currentframe', 'slope', '_parent', 'yminBall', 'ymaxBall']
+0042: Push ['tx', '', 0.0]
+0052: GetProperty
+0053: Push ['vx']
+0058: GetVariable
+0059: Add2
+005a: SetVariable
+005b: Push ['ty', '', 1]
+0067: GetProperty
+0068: Push ['vy']
+006d: GetVariable
+006e: Add2
+006f: SetVariable
+0070: Push ['vx', 'vx']
+0077: GetVariable
+0078: Push [0.5]
+0084: Multiply
+0085: SetVariable
+0086: Push ['vy', 'vy']
+008d: GetVariable
+008e: Push [0.5]
+009a: Multiply
+009b: SetVariable
+009c: Push ['f']
+00a1: GetVariable
+00a2: Push ['_currentframe']
+00a7: GetMember
+00a8: Push [2]
+00b0: Equals2
+00b1: Not
+00b2: If -> 215
+00b7: Push ['vx', 'vx']
+00be: GetVariable
+00bf: Push ['', 0.0]
+00cd: GetProperty
+00ce: Push ['slope']
+00d3: GetVariable
+00d4: Divide
+00d5: Add2
+00d6: SetVariable
+00d7: Push ['ty']
+00dc: GetVariable
+00dd: Push ['_parent']
+00e2: GetVariable
+00e3: Push ['yminBall']
+00e8: GetMember
+00e9: Less2
+00ea: Not
+00eb: If -> 286
+00f0: Push ['ty', 2, '_parent']
+00fc: GetVariable
+00fd: Push ['yminBall']
+0102: GetMember
+0103: Multiply
+0104: Push ['ty']
+0109: GetVariable
+010a: Subtract
+010b: SetVariable
+010c: Push ['vy', 'vy']
+0113: GetVariable
+0114: Push [-1]
+011c: Multiply
+011d: SetVariable
+011e: Push ['_parent']
+0123: GetVariable
+0124: Push ['ymaxBall']
+0129: GetMember
+012a: Push ['ty']
+012f: GetVariable
+0130: Less2
+0131: Not
+0132: If -> 357
+0137: Push ['ty', 2, '_parent']
+0143: GetVariable
+0144: Push ['ymaxBall']
+0149: GetMember
+014a: Multiply
+014b: Push ['ty']
+0150: GetVariable
+0151: Subtract
+0152: SetVariable
+0153: Push ['vy', 'vy']
+015a: GetVariable
+015b: Push [-1]
+0163: Multiply
+0164: SetVariable
+0165: Push ['', 0.0, 'tx']
+0175: GetVariable
+0176: SetProperty
+0177: Push ['', 1, 'ty']
+0183: GetVariable
+0184: SetProperty
+0185: End
+
+## sprite 16 frame 5
+0000: GotoFrame frame=3
+0005: Play
+0006: End
+
+## frame 1
+0000: Push ['offline', False]
+000e: SetVariable
+000f: Push ['', 19, 'MEDIUM']
+0021: GetVariable
+0022: SetProperty
+0023: End
+
+## frame 2
+0000: ConstantPool ['_level0', 'getBytesLoaded', 'getBytesTotal', 'title', 'loading ', ' kbyte...', 'percent', ' %', 'matches', 'polarisation', 'sfxflag', 'gstrength', 'speedmod', 'gamesPlayed']
+008a: Push [0.0, '_level0']
+0098: GetVariable
+0099: Push ['getBytesLoaded']
+009e: CallMethod
+009f: Push [0.0, '_level0']
+00ad: GetVariable
+00ae: Push ['getBytesTotal']
+00b3: CallMethod
+00b4: Less2
+00b5: Not
+00b6: If -> 298
+00bb: GotoFrame frame=0
+00c0: Play
+00c1: Push ['title', 'loading ', 0.0, '_level0']
+00d3: GetVariable
+00d4: Push ['getBytesTotal']
+00d9: CallMethod
+00da: Push [1024]
+00e2: Divide
+00e3: ToInteger
+00e4: Add2
+00e5: Push [' kbyte...']
+00ea: Add2
+00eb: SetVariable
+00ec: Push ['percent', 0.0, '_level0']
+00fc: GetVariable
+00fd: Push ['getBytesLoaded']
+0102: CallMethod
+0103: Push [0.0, '_level0']
+0111: GetVariable
+0112: Push ['getBytesTotal']
+0117: CallMethod
+0118: Divide
+0119: Push [100]
+0121: Multiply
+0122: ToInteger
+0123: Push [' %']
+0128: Add2
+0129: SetVariable
+012a: Push ['matches', 3]
+0134: SetVariable
+0135: Push ['polarisation', 0.0]
+0143: SetVariable
+0144: Push ['sfxflag', 1]
+014e: SetVariable
+014f: Push ['gstrength', 2]
+0159: SetVariable
+015a: Push ['speedmod', 1]
+0164: SetVariable
+0165: Push ['gamesPlayed', 0.0]
+0173: SetVariable
+0174: End
+
+## label 'xml_wait' frame 3
+
+## button 25 events=overDownToOverUp
+0000: Push ['xml_go', 1, '_root']
+0017: GetVariable
+0018: Push ['gotoAndPlay']
+0028: CallMethod
+0029: Pop
+002a: End
+
+## sprite 29 frame 1
+0000: Play
+0001: End
+
+## sprite 29 frame 90
+0000: Stop
+0001: End
+
+## clip sprite=None frame=3 depth=2 char=29 name=None events=mouseUp
+0000: Push ['offline', True]
+000e: SetVariable
+000f: GotoFrame frame=55
+0014: Play
+0015: End
+
+## frame 4
+0000: End
+
+## label 'xml_go' frame 5
+
+## button 31 events=overDownToOverUp
+0000: GetURL target='_blank' url='http://www.neodelight.com'
+0024: End
+
+## label 'menu' frame 56
+
+## frame 56
+0000: Stop
+0001: End
+
+## sprite 38 frame 1
+0000: ConstantPool ['_root', 'gstrength', 'factor']
+001c: Push ['_root']
+0021: GetVariable
+0022: Push ['gstrength']
+0027: GetMember
+0028: Push [1]
+0030: Equals2
+0031: Not
+0032: If -> 71
+0037: Push ['factor', 10]
+0041: SetVariable
+0042: Jump -> 211
+0047: Push ['_root']
+004c: GetVariable
+004d: Push ['gstrength']
+0052: GetMember
+0053: Push [2]
+005b: Equals2
+005c: Not
+005d: If -> 114
+0062: Push ['factor', 17]
+006c: SetVariable
+006d: Jump -> 211
+0072: Push ['_root']
+0077: GetVariable
+0078: Push ['gstrength']
+007d: GetMember
+007e: Push [3]
+0086: Equals2
+0087: Not
+0088: If -> 157
+008d: Push ['factor', 50]
+0097: SetVariable
+0098: Jump -> 211
+009d: Push ['_root']
+00a2: GetVariable
+00a3: Push ['gstrength']
+00a8: GetMember
+00a9: Push [4]
+00b1: Equals2
+00b2: Not
+00b3: If -> 200
+00b8: Push ['factor', 120]
+00c2: SetVariable
+00c3: Jump -> 211
+00c8: Push ['factor', 210]
+00d2: SetVariable
+00d3: End
+
+## sprite 38 frame 2
+0000: ConstantPool ['energyFactor', 'delBall', 'Array', 'i', '_parent', 'ballReg', 'length', 'x', '_parent.ball_', '._x', 'y', '._y', 'vx', '.vx', 'vy', '.vy', 'e', 'ballE', 'j', 'mycolor', '.c._currentframe', 'gbx', 'gby', 'gbe', 't1', 't2', 'gd', 'Math', 'sqrt', 'c', 'gotoAndStop', 'partJ', 'partI', 'setEnergy', 'merge', 'gotoAndPlay', 'push', 'gvx', 'gvy', 'factor', 'gds', 'gdp', '_root', 'polarisation', 'partnercolor', 'splice']
+011c: Push ['energyFactor', 500]
+0126: SetVariable
+0127: Push ['delBall', 0.0, 'Array']
+0137: NewObject
+0138: SetVariable
+0139: Push ['i', 0.0]
+0147: SetVariable
+0148: Push ['i']
+014d: GetVariable
+014e: Push ['_parent']
+0153: GetVariable
+0154: Push ['ballReg']
+0159: GetMember
+015a: Push ['length']
+015f: GetMember
+0160: Push [1]
+0168: Subtract
+0169: Less2
+016a: Not
+016b: If -> 2163
+0170: Push ['x', '_parent.ball_', '_parent']
+0179: GetVariable
+017a: Push ['ballReg']
+017f: GetMember
+0180: Push ['i']
+0185: GetVariable
+0186: GetMember
+0187: Add2
+0188: Push ['._x']
+018d: Add2
+018e: GetVariable
+018f: SetVariable
+0190: Push ['y', '_parent.ball_', '_parent']
+0199: GetVariable
+019a: Push ['ballReg']
+019f: GetMember
+01a0: Push ['i']
+01a5: GetVariable
+01a6: GetMember
+01a7: Add2
+01a8: Push ['._y']
+01ad: Add2
+01ae: GetVariable
+01af: SetVariable
+01b0: Push ['vx', '_parent.ball_', '_parent']
+01b9: GetVariable
+01ba: Push ['ballReg']
+01bf: GetMember
+01c0: Push ['i']
+01c5: GetVariable
+01c6: GetMember
+01c7: Add2
+01c8: Push ['.vx']
+01cd: Add2
+01ce: GetVariable
+01cf: SetVariable
+01d0: Push ['vy', '_parent.ball_', '_parent']
+01d9: GetVariable
+01da: Push ['ballReg']
+01df: GetMember
+01e0: Push ['i']
+01e5: GetVariable
+01e6: GetMember
+01e7: Add2
+01e8: Push ['.vy']
+01ed: Add2
+01ee: GetVariable
+01ef: SetVariable
+01f0: Push ['e', '_parent']
+01f7: GetVariable
+01f8: Push ['ballE']
+01fd: GetMember
+01fe: Push ['_parent']
+0203: GetVariable
+0204: Push ['ballReg']
+0209: GetMember
+020a: Push ['i']
+020f: GetVariable
+0210: GetMember
+0211: GetMember
+0212: SetVariable
+0213: Push ['j', 'i']
+021a: GetVariable
+021b: Push [1]
+0223: Add2
+0224: SetVariable
+0225: Push ['j']
+022a: GetVariable
+022b: Push ['_parent']
+0230: GetVariable
+0231: Push ['ballReg']
+0236: GetMember
+0237: Push ['length']
+023c: GetMember
+023d: Less2
+023e: Not
+023f: If -> 2078
+0244: Push ['mycolor', '_parent.ball_', '_parent']
+024d: GetVariable
+024e: Push ['ballReg']
+0253: GetMember
+0254: Push ['i']
+0259: GetVariable
+025a: GetMember
+025b: Add2
+025c: Push ['.c._currentframe']
+0261: Add2
+0262: GetVariable
+0263: SetVariable
+0264: Push ['gbx', '_parent.ball_', '_parent']
+026d: GetVariable
+026e: Push ['ballReg']
+0273: GetMember
+0274: Push ['j']
+0279: GetVariable
+027a: GetMember
+027b: Add2
+027c: Push ['._x']
+0281: Add2
+0282: GetVariable
+0283: SetVariable
+0284: Push ['gby', '_parent.ball_', '_parent']
+028d: GetVariable
+028e: Push ['ballReg']
+0293: GetMember
+0294: Push ['j']
+0299: GetVariable
+029a: GetMember
+029b: Add2
+029c: Push ['._y']
+02a1: Add2
+02a2: GetVariable
+02a3: SetVariable
+02a4: Push ['gbe', '_parent']
+02ab: GetVariable
+02ac: Push ['ballE']
+02b1: GetMember
+02b2: Push ['_parent']
+02b7: GetVariable
+02b8: Push ['ballReg']
+02bd: GetMember
+02be: Push ['j']
+02c3: GetVariable
+02c4: GetMember
+02c5: GetMember
+02c6: SetVariable
+02c7: Push ['t1', 'gbx']
+02ce: GetVariable
+02cf: Push ['x']
+02d4: GetVariable
+02d5: Subtract
+02d6: DefineLocal
+02d7: Push ['t2', 'gby']
+02de: GetVariable
+02df: Push ['y']
+02e4: GetVariable
+02e5: Subtract
+02e6: DefineLocal
+02e7: Push ['gd', 't1']
+02ee: GetVariable
+02ef: Push ['t1']
+02f4: GetVariable
+02f5: Multiply
+02f6: Push ['t2']
+02fb: GetVariable
+02fc: Push ['t2']
+0301: GetVariable
+0302: Multiply
+0303: Add2
+0304: Push [1, 'Math']
+030e: GetVariable
+030f: Push ['sqrt']
+0314: CallMethod
+0315: SetVariable
+0316: Push ['gd']
+031b: GetVariable
+031c: Push [15]
+0324: Less2
+0325: Not
+0326: If -> 1425
+032b: Push ['_parent']
+0330: GetVariable
+0331: Push ['ballE']
+0336: GetMember
+0337: Push ['_parent']
+033c: GetVariable
+033d: Push ['ballReg']
+0342: GetMember
+0343: Push ['i']
+0348: GetVariable
+0349: GetMember
+034a: GetMember
+034b: Push ['_parent']
+0350: GetVariable
+0351: Push ['ballE']
+0356: GetMember
+0357: Push ['_parent']
+035c: GetVariable
+035d: Push ['ballReg']
+0362: GetMember
+0363: Push ['j']
+0368: GetVariable
+0369: GetMember
+036a: GetMember
+036b: Less2
+036c: Not
+036d: If -> 916
+0372: Push ['_parent.ball_', 'j']
+0379: GetVariable
+037a: Add2
+037b: Push ['.c._currentframe']
+0380: Add2
+0381: GetVariable
+0382: Push [1, 'c']
+038c: GetVariable
+038d: Push ['gotoAndStop']
+0392: CallMethod
+0393: Pop
+0394: Push ['_parent']
+0399: GetVariable
+039a: Push ['ballE']
+039f: GetMember
+03a0: Push ['_parent']
+03a5: GetVariable
+03a6: Push ['ballReg']
+03ab: GetMember
+03ac: Push ['i']
+03b1: GetVariable
+03b2: GetMember
+03b3: Push ['_parent']
+03b8: GetVariable
+03b9: Push ['ballE']
+03be: GetMember
+03bf: Push ['_parent']
+03c4: GetVariable
+03c5: Push ['ballReg']
+03ca: GetMember
+03cb: Push ['i']
+03d0: GetVariable
+03d1: GetMember
+03d2: GetMember
+03d3: Push ['_parent']
+03d8: GetVariable
+03d9: Push ['ballE']
+03de: GetMember
+03df: Push ['_parent']
+03e4: GetVariable
+03e5: Push ['ballReg']
+03ea: GetMember
+03eb: Push ['j']
+03f0: GetVariable
+03f1: GetMember
+03f2: GetMember
+03f3: Add2
+03f4: SetMember
+03f5: Push [600, '_parent']
+03ff: GetVariable
+0400: Push ['ballE']
+0405: GetMember
+0406: Push ['_parent']
+040b: GetVariable
+040c: Push ['ballReg']
+0411: GetMember
+0412: Push ['i']
+0417: GetVariable
+0418: GetMember
+0419: GetMember
+041a: Less2
+041b: Not
+041c: If -> 1097
+0421: Push ['_parent']
+0426: GetVariable
+0427: Push ['ballE']
+042c: GetMember
+042d: Push ['_parent']
+0432: GetVariable
+0433: Push ['ballReg']
+0438: GetMember
+0439: Push ['i']
+043e: GetVariable
+043f: GetMember
+0440: Push [600]
+0448: SetMember
+0449: Push ['partJ', '_parent']
+0450: GetVariable
+0451: Push ['ballE']
+0456: GetMember
+0457: Push ['_parent']
+045c: GetVariable
+045d: Push ['ballReg']
+0462: GetMember
+0463: Push ['j']
+0468: GetVariable
+0469: GetMember
+046a: GetMember
+046b: Push ['_parent']
+0470: GetVariable
+0471: Push ['ballE']
+0476: GetMember
+0477: Push ['_parent']
+047c: GetVariable
+047d: Push ['ballReg']
+0482: GetMember
+0483: Push ['i']
+0488: GetVariable
+0489: GetMember
+048a: GetMember
+048b: Divide
+048c: SetVariable
+048d: Push ['partI', 1, 'partJ']
+0499: GetVariable
+049a: Subtract
+049b: SetVariable
+049c: Push ['vx', 'partI']
+04a3: GetVariable
+04a4: Push ['vx']
+04a9: GetVariable
+04aa: Multiply
+04ab: Push ['partJ']
+04b0: GetVariable
+04b1: Push ['_parent.ball_', '_parent']
+04b8: GetVariable
+04b9: Push ['ballReg']
+04be: GetMember
+04bf: Push ['j']
+04c4: GetVariable
+04c5: GetMember
+04c6: Add2
+04c7: Push ['.vx']
+04cc: Add2
+04cd: GetVariable
+04ce: Multiply
+04cf: Add2
+04d0: SetVariable
+04d1: Push ['vy', 'partI']
+04d8: GetVariable
+04d9: Push ['vy']
+04de: GetVariable
+04df: Multiply
+04e0: Push ['partJ']
+04e5: GetVariable
+04e6: Push ['_parent.ball_', '_parent']
+04ed: GetVariable
+04ee: Push ['ballReg']
+04f3: GetMember
+04f4: Push ['j']
+04f9: GetVariable
+04fa: GetMember
+04fb: Add2
+04fc: Push ['.vy']
+0501: Add2
+0502: GetVariable
+0503: Multiply
+0504: Add2
+0505: SetVariable
+0506: Push ['_parent']
+050b: GetVariable
+050c: Push ['ballE']
+0511: GetMember
+0512: Push ['_parent']
+0517: GetVariable
+0518: Push ['ballReg']
+051d: GetMember
+051e: Push ['j']
+0523: GetVariable
+0524: GetMember
+0525: Push [0.0]
+0531: SetMember
+0532: Push ['_parent.ball_', '_parent']
+0539: GetVariable
+053a: Push ['ballReg']
+053f: GetMember
+0540: Push ['i']
+0545: GetVariable
+0546: GetMember
+0547: Add2
+0548: SetTarget2
+0549: Push [0.0, 'setEnergy']
+0557: CallFunction
+0558: Pop
+0559: Push [2, 1, 'merge']
+0568: GetVariable
+0569: Push ['gotoAndPlay']
+056e: CallMethod
+056f: Pop
+0570: SetTarget target=''
+0574: Push ['j']
+0579: GetVariable
+057a: Push [1, 'delBall']
+0584: GetVariable
+0585: Push ['push']
+058a: CallMethod
+058b: Pop
+058c: Jump -> 2063
+0591: Push ['gvx', 'gbx']
+0598: GetVariable
+0599: Push ['x']
+059e: GetVariable
+059f: Subtract
+05a0: Push ['gd']
+05a5: GetVariable
+05a6: Divide
+05a7: SetVariable
+05a8: Push ['gvy', 'gby']
+05af: GetVariable
+05b0: Push ['y']
+05b5: GetVariable
+05b6: Subtract
+05b7: Push ['gd']
+05bc: GetVariable
+05bd: Divide
+05be: SetVariable
+05bf: Push ['gd', 'gd']
+05c6: GetVariable
+05c7: Push ['factor']
+05cc: GetVariable
+05cd: Divide
+05ce: SetVariable
+05cf: Push ['gds', 'gd']
+05d6: GetVariable
+05d7: Push ['gbe']
+05dc: GetVariable
+05dd: Push ['energyFactor']
+05e2: GetVariable
+05e3: Divide
+05e4: Divide
+05e5: SetVariable
+05e6: Push ['gdp', 'gd']
+05ed: GetVariable
+05ee: Push ['e']
+05f3: GetVariable
+05f4: Push ['energyFactor']
+05f9: GetVariable
+05fa: Divide
+05fb: Divide
+05fc: SetVariable
+05fd: Push ['_root']
+0602: GetVariable
+0603: Push ['polarisation']
+0608: GetMember
+0609: Push [0.0]
+0615: Equals2
+0616: Not
+0617: Not
+0618: If -> 1873
+061d: Push ['partnercolor', '_parent.ball_', '_parent']
+0626: GetVariable
+0627: Push ['ballReg']
+062c: GetMember
+062d: Push ['j']
+0632: GetVariable
+0633: GetMember
+0634: Add2
+0635: Push ['.c._currentframe']
+063a: Add2
+063b: GetVariable
+063c: SetVariable
+063d: Push ['mycolor']
+0642: GetVariable
+0643: Push ['partnercolor']
+0648: GetVariable
+0649: Equals2
+064a: Not
+064b: If -> 1747
+0650: Push ['_root']
+0655: GetVariable
+0656: Push ['polarisation']
+065b: GetMember
+065c: Push [1]
+0664: Equals2
+0665: Not
+0666: If -> 1679
+066b: Push ['gdp', 'gdp']
+0672: GetVariable
+0673: Push [-1]
+067b: Multiply
+067c: SetVariable
+067d: Push ['gds', 'gds']
+0684: GetVariable
+0685: Push [-1]
+068d: Multiply
+068e: SetVariable
+068f: Push ['_root']
+0694: GetVariable
+0695: Push ['polarisation']
+069a: GetMember
+069b: Push [2]
+06a3: Equals2
+06a4: Not
+06a5: If -> 1742
+06aa: Push ['gdp', 'gdp']
+06b1: GetVariable
+06b2: Push [-1]
+06ba: Multiply
+06bb: SetVariable
+06bc: Push ['gds', 'gds']
+06c3: GetVariable
+06c4: Push [-1]
+06cc: Multiply
+06cd: SetVariable
+06ce: Jump -> 1873
+06d3: Push ['_root']
+06d8: GetVariable
+06d9: Push ['polarisation']
+06de: GetMember
+06df: Push [-1]
+06e7: Equals2
+06e8: Not
+06e9: If -> 1810
+06ee: Push ['gdp', 'gdp']
+06f5: GetVariable
+06f6: Push [-1]
+06fe: Multiply
+06ff: SetVariable
+0700: Push ['gds', 'gds']
+0707: GetVariable
+0708: Push [-1]
+0710: Multiply
+0711: SetVariable
+0712: Push ['_root']
+0717: GetVariable
+0718: Push ['polarisation']
+071d: GetMember
+071e: Push [2]
+0726: Equals2
+0727: Not
+0728: If -> 1873
+072d: Push ['gdp', 'gdp']
+0734: GetVariable
+0735: Push [-1]
+073d: Multiply
+073e: SetVariable
+073f: Push ['gds', 'gds']
+0746: GetVariable
+0747: Push [-1]
+074f: Multiply
+0750: SetVariable
+0751: Push ['vx', 'vx']
+0758: GetVariable
+0759: Push ['gvx']
+075e: GetVariable
+075f: Push ['gds']
+0764: GetVariable
+0765: Divide
+0766: Add2
+0767: SetVariable
+0768: Push ['vy', 'vy']
+076f: GetVariable
+0770: Push ['gvy']
+0775: GetVariable
+0776: Push ['gds']
+077b: GetVariable
+077c: Divide
+077d: Add2
+077e: SetVariable
+077f: Push ['_parent.ball_', '_parent']
+0786: GetVariable
+0787: Push ['ballReg']
+078c: GetMember
+078d: Push ['j']
+0792: GetVariable
+0793: GetMember
+0794: Add2
+0795: Push ['.vx']
+079a: Add2
+079b: Push ['_parent.ball_', '_parent']
+07a2: GetVariable
+07a3: Push ['ballReg']
+07a8: GetMember
+07a9: Push ['j']
+07ae: GetVariable
+07af: GetMember
+07b0: Add2
+07b1: Push ['.vx']
+07b6: Add2
+07b7: GetVariable
+07b8: Push ['gvx']
+07bd: GetVariable
+07be: Push ['gdp']
+07c3: GetVariable
+07c4: Divide
+07c5: Subtract
+07c6: SetVariable
+07c7: Push ['_parent.ball_', '_parent']
+07ce: GetVariable
+07cf: Push ['ballReg']
+07d4: GetMember
+07d5: Push ['j']
+07da: GetVariable
+07db: GetMember
+07dc: Add2
+07dd: Push ['.vy']
+07e2: Add2
+07e3: Push ['_parent.ball_', '_parent']
+07ea: GetVariable
+07eb: Push ['ballReg']
+07f0: GetMember
+07f1: Push ['j']
+07f6: GetVariable
+07f7: GetMember
+07f8: Add2
+07f9: Push ['.vy']
+07fe: Add2
+07ff: GetVariable
+0800: Push ['gvy']
+0805: GetVariable
+0806: Push ['gdp']
+080b: GetVariable
+080c: Divide
+080d: Subtract
+080e: SetVariable
+080f: Push ['j', 'j']
+0816: GetVariable
+0817: Increment
+0818: SetVariable
+0819: Jump -> 549
+081e: Push ['_parent.ball_', '_parent']
+0825: GetVariable
+0826: Push ['ballReg']
+082b: GetMember
+082c: Push ['i']
+0831: GetVariable
+0832: GetMember
+0833: Add2
+0834: Push ['.vx']
+0839: Add2
+083a: Push ['vx']
+083f: GetVariable
+0840: SetVariable
+0841: Push ['_parent.ball_', '_parent']
+0848: GetVariable
+0849: Push ['ballReg']
+084e: GetMember
+084f: Push ['i']
+0854: GetVariable
+0855: GetMember
+0856: Add2
+0857: Push ['.vy']
+085c: Add2
+085d: Push ['vy']
+0862: GetVariable
+0863: SetVariable
+0864: Push ['i', 'i']
+086b: GetVariable
+086c: Increment
+086d: SetVariable
+086e: Jump -> 328
+0873: Push ['i', 0.0]
+0881: SetVariable
+0882: Push ['i']
+0887: GetVariable
+0888: Push ['delBall']
+088d: GetVariable
+088e: Push ['length']
+0893: GetMember
+0894: Less2
+0895: Not
+0896: If -> 2290
+089b: Push ['_parent.ball_', '_parent']
+08a2: GetVariable
+08a3: Push ['ballReg']
+08a8: GetMember
+08a9: Push ['delBall']
+08ae: GetVariable
+08af: Push ['i']
+08b4: GetVariable
+08b5: GetMember
+08b6: GetMember
+08b7: Add2
+08b8: RemoveSprite
+08b9: Push [1, 'delBall']
+08c3: GetVariable
+08c4: Push ['i']
+08c9: GetVariable
+08ca: GetMember
+08cb: Push [2, '_parent']
+08d5: GetVariable
+08d6: Push ['ballReg']
+08db: GetMember
+08dc: Push ['splice']
+08e1: CallMethod
+08e2: Pop
+08e3: Push ['i', 'i']
+08ea: GetVariable
+08eb: Increment
+08ec: SetVariable
+08ed: Jump -> 2178
+08f2: End
+
+## sprite 38 frame 3
+0000: GotoFrame frame=1
+0005: Play
+0006: End
+
+## button 39 events=overDownToOverUp,overDownToOutDown
+0000: GotoFrame frame=57
+0005: Play
+0006: End
+
+## sprite 42 frame 1
+0000: ConstantPool ['_parent', 'polarisation']
+001a: Push ['_parent']
+001f: GetVariable
+0020: Push ['polarisation']
+0025: GetMember
+0026: Push [0.0]
+0032: Equals2
+0033: Not
+0034: If -> 67
+0039: GotoFrame frame=1
+003e: Jump -> 146
+0043: Push ['_parent']
+0048: GetVariable
+0049: Push ['polarisation']
+004e: GetMember
+004f: Push [-1]
+0057: Equals2
+0058: Not
+0059: If -> 104
+005e: GotoFrame frame=2
+0063: Jump -> 146
+0068: Push ['_parent']
+006d: GetVariable
+006e: Push ['polarisation']
+0073: GetMember
+0074: Push [1]
+007c: Equals2
+007d: Not
+007e: If -> 141
+0083: GotoFrame frame=3
+0088: Jump -> 146
+008d: GotoFrame frame=4
+0092: End
+
+## sprite 42 frame 2
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['polarisation', 0.0]
+0027: SetMember
+0028: End
+
+## sprite 42 frame 3
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['polarisation', -1]
+0023: SetMember
+0024: End
+
+## sprite 42 frame 4
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['polarisation', 1]
+0023: SetMember
+0024: End
+
+## sprite 42 frame 5
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['polarisation', 2]
+0023: SetMember
+0024: End
+
+## sprite 47 frame 1
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['matches']
+0019: GetMember
+001a: Push [3]
+0022: Add2
+0023: Push [2]
+002b: Divide
+002c: GotoFrame2 play=False
+0030: End
+
+## sprite 47 frame 2
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['matches', 1]
+001e: SetMember
+001f: End
+
+## sprite 47 frame 3
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['matches', 3]
+001e: SetMember
+001f: End
+
+## sprite 47 frame 4
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['matches', 5]
+001e: SetMember
+001f: End
+
+## sprite 47 frame 5
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['matches', 7]
+001e: SetMember
+001f: End
+
+## button 48 events=overDownToOverUp
+0000: ConstantPool ['gravitymode', '_currentframe', '_totalframes', 'nextFrame', 'gotoAndStop']
+0042: Push ['gravitymode']
+0047: GetVariable
+0048: Push ['_currentframe']
+004d: GetMember
+004e: Push ['gravitymode']
+0053: GetVariable
+0054: Push ['_totalframes']
+0059: GetMember
+005a: Less2
+005b: Not
+005c: If -> 124
+0061: Push [0.0, 'gravitymode']
+006f: GetVariable
+0070: Push ['nextFrame']
+0075: CallMethod
+0076: Pop
+0077: Jump -> 147
+007c: Push [2, 1, 'gravitymode']
+008b: GetVariable
+008c: Push ['gotoAndStop']
+0091: CallMethod
+0092: Pop
+0093: End
+
+## button 50 events=overDownToOverUp
+0000: ConstantPool ['matchtype', '_currentframe', '_totalframes', 'nextFrame', 'gotoAndStop']
+0040: Push ['matchtype']
+0045: GetVariable
+0046: Push ['_currentframe']
+004b: GetMember
+004c: Push ['matchtype']
+0051: GetVariable
+0052: Push ['_totalframes']
+0057: GetMember
+0058: Less2
+0059: Not
+005a: If -> 122
+005f: Push [0.0, 'matchtype']
+006d: GetVariable
+006e: Push ['nextFrame']
+0073: CallMethod
+0074: Pop
+0075: Jump -> 145
+007a: Push [2, 1, 'matchtype']
+0089: GetVariable
+008a: Push ['gotoAndStop']
+008f: CallMethod
+0090: Pop
+0091: End
+
+## button 52 events=overDownToOverUp
+0000: GotoFrame frame=56
+0005: End
+
+## sprite 63 frame 1
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['gstrength']
+001b: GetMember
+001c: Push [1]
+0024: Add2
+0025: GotoFrame2 play=False
+0029: End
+
+## sprite 63 frame 2
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['gstrength', 1]
+0020: SetMember
+0021: End
+
+## sprite 63 frame 3
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['gstrength', 2]
+0020: SetMember
+0021: End
+
+## sprite 63 frame 4
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['gstrength', 3]
+0020: SetMember
+0021: End
+
+## sprite 63 frame 5
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['gstrength', 4]
+0020: SetMember
+0021: End
+
+## sprite 63 frame 6
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['gstrength', 5]
+0020: SetMember
+0021: End
+
+## button 64 events=overDownToOverUp
+0000: ConstantPool ['mc_gstrength', '_currentframe', '_totalframes', 'nextFrame', 'gotoAndStop']
+0043: Push ['mc_gstrength']
+0048: GetVariable
+0049: Push ['_currentframe']
+004e: GetMember
+004f: Push ['mc_gstrength']
+0054: GetVariable
+0055: Push ['_totalframes']
+005a: GetMember
+005b: Less2
+005c: Not
+005d: If -> 125
+0062: Push [0.0, 'mc_gstrength']
+0070: GetVariable
+0071: Push ['nextFrame']
+0076: CallMethod
+0077: Pop
+0078: Jump -> 148
+007d: Push [2, 1, 'mc_gstrength']
+008c: GetVariable
+008d: Push ['gotoAndStop']
+0092: CallMethod
+0093: Pop
+0094: End
+
+## button 66 events=overDownToOverUp
+0000: ConstantPool ['mc_speedmod', '_currentframe', '_totalframes', 'nextFrame', 'PreName', 'gotoAndStop']
+004a: Push ['mc_speedmod']
+004f: GetVariable
+0050: Push ['_currentframe']
+0055: GetMember
+0056: Push ['mc_speedmod']
+005b: GetVariable
+005c: Push ['_totalframes']
+0061: GetMember
+0062: Less2
+0063: Not
+0064: If -> 154
+0069: Push [0.0, 'mc_speedmod']
+0077: GetVariable
+0078: Push ['nextFrame']
+007d: CallMethod
+007e: Pop
+007f: Push [0.0, 'PreName']
+008d: GetVariable
+008e: Push ['nextFrame']
+0093: CallMethod
+0094: Pop
+0095: Jump -> 200
+009a: Push [2, 1, 'mc_speedmod']
+00a9: GetVariable
+00aa: Push ['gotoAndStop']
+00af: CallMethod
+00b0: Pop
+00b1: Push [1, 1, 'PreName']
+00c0: GetVariable
+00c1: Push ['gotoAndStop']
+00c6: CallMethod
+00c7: Pop
+00c8: End
+
+## sprite 70 frame 1
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['speedmod']
+001a: GetMember
+001b: Push [1]
+0023: Add2
+0024: GotoFrame2 play=False
+0028: End
+
+## sprite 70 frame 2
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['speedmod', 1]
+001f: SetMember
+0020: End
+
+## sprite 70 frame 3
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['speedmod', 2]
+001f: SetMember
+0020: End
+
+## button 75 events=overDownToOverUp
+0000: GetURL target='_blank' url='http://www.neokolor.com'
+0022: End
+
+## clip sprite=None frame=56 depth=47 char=79 name=roundsPlayed events=load
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['offline']
+0019: GetMember
+001a: Push [True]
+001f: Equals2
+0020: Not
+0021: If -> 51
+0026: Push ['', 7, False]
+0032: SetProperty
+0033: End
+
+## sprite 83 frame 1
+0000: Stop
+0001: End
+
+## sprite 83 frame 2
+0000: Stop
+0001: End
+
+## sprite 86 frame 1
+0000: Stop
+0001: End
+
+## sprite 86 label 'flash' frame 2
+
+## sprite 88 frame 1
+0000: Stop
+0001: End
+
+## sprite 88 label 'flash' frame 2
+
+## button 99 events=overDownToOverUp
+0000: GetURL target='_self' url='http://www.neodelight.com'
+0023: End
+
+## label 'intro' frame 57
+
+## frame 57
+0000: Stop
+0001: End
+
+## button 103 events=overDownToOverUp
+0000: GotoFrame frame=55
+0005: Play
+0006: End
+
+## button 124 events=overDownToOverUp
+0000: GotoFrame frame=55
+0005: End
+
+## label 'startmatch' frame 58
+
+## frame 58
+0000: Stop
+0001: End
+
+## sprite 125 frame 1
+0000: Stop
+0001: End
+
+## sprite 125 label 'flash' frame 2
+
+## sprite 126 frame 1
+0000: Stop
+0001: End
+
+## sprite 126 label 'flash' frame 2
+
+## sprite 128 frame 200
+0000: Stop
+0001: End
+
+## sprite 129 frame 200
+0000: Stop
+0001: End
+
+## sprite 130 frame 1
+0000: Push ['_parent']
+000c: GetVariable
+000d: Push ['_name']
+0017: GetMember
+0018: Push ['pl1']
+0020: Equals2
+0021: Not
+0022: If -> 45
+0027: Stop
+0028: Jump -> 46
+002d: NextFrame
+002e: End
+
+## sprite 130 frame 2
+0000: Stop
+0001: End
+
+## sprite 132 frame 1
+0000: ConstantPool ['a', 'v', 'paddleSize', 'friction', '', 'pl1', 'key_UP', 'Key', 'UP', 'key_Down', 'DOWN', 'key_Shoot', 'LEFT']
+004d: Push ['a', 1]
+0057: SetVariable
+0058: Push ['v', 0.0]
+0066: SetVariable
+0067: Push ['paddleSize', 30]
+0071: SetVariable
+0072: Push ['friction', 0.8]
+0080: SetVariable
+0081: Push ['', 13]
+008b: GetProperty
+008c: Push ['pl1']
+0091: Equals2
+0092: Not
+0093: If -> 202
+0098: Push ['key_UP', 'Key']
+009f: GetVariable
+00a0: Push ['UP']
+00a5: GetMember
+00a6: SetVariable
+00a7: Push ['key_Down', 'Key']
+00ae: GetVariable
+00af: Push ['DOWN']
+00b4: GetMember
+00b5: SetVariable
+00b6: Push ['key_Shoot', 'Key']
+00bd: GetVariable
+00be: Push ['LEFT']
+00c3: GetMember
+00c4: SetVariable
+00c5: Jump -> 235
+00ca: Push ['key_UP', 87]
+00d4: SetVariable
+00d5: Push ['key_Down', 83]
+00df: SetVariable
+00e0: Push ['key_Shoot', 68]
+00ea: SetVariable
+00eb: End
+
+## sprite 132 label 'move' frame 2
+
+## sprite 132 frame 2
+0000: ConstantPool ['Key_DOWN', 'Key', 'isDown', 'v', 'a', 'Key_UP', 'friction', 'Key_Shoot', 'gunReady', 'e', '_currentframe', '_parent', 'ballID', 'ball_', 'ball', 'attachMovie', 'ballOwn', '', 'ballE', 'gotoAndPlay', 'ballRegID', 'Reg', 'length', 'ballReg', 'push', 'ty', 'ymin', 'ymax']
+00c0: Push ['Key_DOWN']
+00c5: GetVariable
+00c6: Push [1, 'Key']
+00d0: GetVariable
+00d1: Push ['isDown']
+00d6: CallMethod
+00d7: Not
+00d8: If -> 279
+00dd: Push ['v', 'v']
+00e4: GetVariable
+00e5: Push ['a']
+00ea: GetVariable
+00eb: Add2
+00ec: SetVariable
+00ed: Push ['v']
+00f2: GetVariable
+00f3: Push [2]
+00fb: Less2
+00fc: Not
+00fd: If -> 274
+0102: Push ['v', 'v']
+0109: GetVariable
+010a: Push ['a']
+010f: GetVariable
+0110: Add2
+0111: SetVariable
+0112: Jump -> 379
+0117: Push ['Key_UP']
+011c: GetVariable
+011d: Push [1, 'Key']
+0127: GetVariable
+0128: Push ['isDown']
+012d: CallMethod
+012e: Not
+012f: If -> 363
+0134: Push ['v', 'v']
+013b: GetVariable
+013c: Push ['a']
+0141: GetVariable
+0142: Subtract
+0143: SetVariable
+0144: Push [-2, 'v']
+014e: GetVariable
+014f: Less2
+0150: Not
+0151: If -> 358
+0156: Push ['v', 'v']
+015d: GetVariable
+015e: Push ['a']
+0163: GetVariable
+0164: Subtract
+0165: SetVariable
+0166: Jump -> 379
+016b: Push ['v', 'v']
+0172: GetVariable
+0173: Push ['friction']
+0178: GetVariable
+0179: Multiply
+017a: SetVariable
+017b: Push ['Key_Shoot']
+0180: GetVariable
+0181: Push [1, 'Key']
+018b: GetVariable
+018c: Push ['isDown']
+0191: CallMethod
+0192: Not
+0193: If -> 712
+0198: Push ['gunReady']
+019d: GetVariable
+019e: Push [True]
+01a3: Equals2
+01a4: Not
+01a5: If -> 712
+01aa: Push [20, 'e']
+01b4: GetVariable
+01b5: Push ['e']
+01ba: GetMember
+01bb: Push ['_currentframe']
+01c0: GetMember
+01c1: Less2
+01c2: Not
+01c3: If -> 712
+01c8: Push ['_parent']
+01cd: GetVariable
+01ce: Push ['ballID']
+01d3: GetMember
+01d4: Push ['ball_', '_parent']
+01db: GetVariable
+01dc: Push ['ballID']
+01e1: GetMember
+01e2: Add2
+01e3: Push ['ball', 3, '_parent']
+01ef: GetVariable
+01f0: Push ['attachMovie']
+01f5: CallMethod
+01f6: Pop
+01f7: Push ['_parent']
+01fc: GetVariable
+01fd: Push ['ballOwn']
+0202: GetMember
+0203: Push ['_parent']
+0208: GetVariable
+0209: Push ['ballID']
+020e: GetMember
+020f: Push ['', 13]
+0219: GetProperty
+021a: SetMember
+021b: Push ['_parent']
+0220: GetVariable
+0221: Push ['ballE']
+0226: GetMember
+0227: Push ['_parent']
+022c: GetVariable
+022d: Push ['ballID']
+0232: GetMember
+0233: Push ['e']
+0238: GetVariable
+0239: Push ['e']
+023e: GetMember
+023f: Push ['_currentframe']
+0244: GetMember
+0245: SetMember
+0246: Push [1, 1, 'e']
+0255: GetVariable
+0256: Push ['e']
+025b: GetMember
+025c: Push ['gotoAndPlay']
+0261: CallMethod
+0262: Pop
+0263: Push ['_parent']
+0268: GetVariable
+0269: Push ['ballRegID']
+026e: GetMember
+026f: Push ['_parent']
+0274: GetVariable
+0275: Push ['ballID']
+027a: GetMember
+027b: Push ['_parent']
+0280: GetVariable
+0281: Push ['Reg']
+0286: GetMember
+0287: Push ['length']
+028c: GetMember
+028d: SetMember
+028e: Push ['_parent']
+0293: GetVariable
+0294: Push ['ballID']
+0299: GetMember
+029a: Push [1, '_parent']
+02a4: GetVariable
+02a5: Push ['ballReg']
+02aa: GetMember
+02ab: Push ['push']
+02b0: CallMethod
+02b1: Pop
+02b2: Push ['_parent']
+02b7: GetVariable
+02b8: Push ['ballID', '_parent']
+02bf: GetVariable
+02c0: Push ['ballID']
+02c5: GetMember
+02c6: Increment
+02c7: SetMember
+02c8: Push ['ty', '', 1]
+02d4: GetProperty
+02d5: Push ['v']
+02da: GetVariable
+02db: Add2
+02dc: SetVariable
+02dd: Push ['ty']
+02e2: GetVariable
+02e3: Push ['_parent']
+02e8: GetVariable
+02e9: Push ['ymin']
+02ee: GetMember
+02ef: Less2
+02f0: Not
+02f1: If -> 788
+02f6: Push ['ty', '_parent']
+02fd: GetVariable
+02fe: Push ['ymin']
+0303: GetMember
+0304: SetVariable
+0305: Push ['v', 0.0]
+0313: SetVariable
+0314: Push ['_parent']
+0319: GetVariable
+031a: Push ['ymax']
+031f: GetMember
+0320: Push ['ty']
+0325: GetVariable
+0326: Less2
+0327: Not
+0328: If -> 843
+032d: Push ['ty', '_parent']
+0334: GetVariable
+0335: Push ['ymax']
+033a: GetMember
+033b: SetVariable
+033c: Push ['v', 0.0]
+034a: SetVariable
+034b: Push ['', 1, 'ty']
+0357: GetVariable
+0358: SetProperty
+0359: End
+
+## sprite 132 frame 3
+0000: GotoFrame frame=1
+0005: Play
+0006: End
+
+## sprite 132 label 'paralised' frame 4
+
+## sprite 132 frame 63
+0000: GotoFrame frame=1
+0005: Play
+0006: End
+
+## sprite 136 frame 1
+0000: Stop
+0001: End
+
+## sprite 136 frame 2
+0000: End
+
+## sprite 139 frame 1
+0000: Stop
+0001: End
+
+## sprite 139 frame 70
+0000: Stop
+0001: End
+
+## sprite 140 frame 1
+0000: ConstantPool ['init', '_root', 'w', 'ballID', 'ballReg', 'Array', 'ballRegID', 'ballOwn', 'ballE', 'ymin', 'ymax', 'yminBall', 'ymaxBall', 'xminBall', 'xmaxBall', 'xminVanish', 'xmaxVanish']
+0083: Push ['init']
+0088: DefineFunction <anonymous>() body_size=143
+  0000: Push ['_root']
+  0005: GetVariable
+  0006: Push ['w']
+  000b: GetMember
+  000c: Push ['ballID', 10]
+  0016: SetMember
+  0017: Push ['_root']
+  001c: GetVariable
+  001d: Push ['w']
+  0022: GetMember
+  0023: Push ['ballReg', 0.0, 'Array']
+  0033: NewObject
+  0034: SetMember
+  0035: Push ['_root']
+  003a: GetVariable
+  003b: Push ['w']
+  0040: GetMember
+  0041: Push ['ballRegID', 0.0, 'Array']
+  0051: NewObject
+  0052: SetMember
+  0053: Push ['_root']
+  0058: GetVariable
+  0059: Push ['w']
+  005e: GetMember
+  005f: Push ['ballOwn', 0.0, 'Array']
+  006f: NewObject
+  0070: SetMember
+  0071: Push ['_root']
+  0076: GetVariable
+  0077: Push ['w']
+  007c: GetMember
+  007d: Push ['ballE', 0.0, 'Array']
+  008d: NewObject
+  008e: SetMember
+011f: SetVariable
+0120: Push [0.0, 'init']
+012e: CallFunction
+012f: Pop
+0130: Push ['ymin', -150]
+013a: SetVariable
+013b: Push ['ymax', 150]
+0145: SetVariable
+0146: Push ['yminBall', -170]
+0150: SetVariable
+0151: Push ['ymaxBall', 170]
+015b: SetVariable
+015c: Push ['xminBall', -235]
+0166: SetVariable
+0167: Push ['xmaxBall', 235]
+0171: SetVariable
+0172: Push ['xminVanish', -250]
+017c: SetVariable
+017d: Push ['xmaxVanish', 250]
+0187: SetVariable
+0188: End
+
+## sprite 162 frame 1
+0000: ConstantPool ['text', '<r />\n', 'unescape', 'http://www.neodelight.com/cgi-bin/gravity/ac.cgi', 'this', '_root', 'gamesPlayed', 'datum', 'Date', 'textlog', '<r d=%22', 'toString', '%22 p=%22', 'polarisation', '%22 g=%22', 'gstrength', '%22 m=%22', 'matches', '%22 s=%22', 'speedmod', '%22/>\n', 'http://www.neodelight.com/cgi-bin/gravity/ac_long.cgi']
+0114: DefineFunction cgiPusher() body_size=58
+  0000: Push ['text', '<r />\n', 1, 'unescape']
+  000e: CallFunction
+  000f: SetVariable
+  0010: Push ['http://www.neodelight.com/cgi-bin/gravity/ac.cgi', 'this']
+  0017: GetVariable
+  0018: GetURL2 send_vars_method=1
+  001c: Push ['_root']
+  0021: GetVariable
+  0022: Push ['gamesPlayed', '_root']
+  0029: GetVariable
+  002a: Push ['gamesPlayed']
+  002f: GetMember
+  0030: Push [1]
+  0038: Add2
+  0039: SetMember
+015f: DefineFunction cgiPusherLong() body_size=150
+  0000: Push ['datum', 0.0, 'Date']
+  0010: NewObject
+  0011: SetVariable
+  0012: Push ['textlog', '<r d=%22', 0.0, 'datum']
+  0024: GetVariable
+  0025: Push ['toString']
+  002a: CallMethod
+  002b: Add2
+  002c: Push ['%22 p=%22']
+  0031: Add2
+  0032: Push ['_root']
+  0037: GetVariable
+  0038: Push ['polarisation']
+  003d: GetMember
+  003e: Add2
+  003f: Push ['%22 g=%22']
+  0044: Add2
+  0045: Push ['_root']
+  004a: GetVariable
+  004b: Push ['gstrength']
+  0050: GetMember
+  0051: Add2
+  0052: Push ['%22 m=%22']
+  0057: Add2
+  0058: Push ['_root']
+  005d: GetVariable
+  005e: Push ['matches']
+  0063: GetMember
+  0064: Add2
+  0065: Push ['%22 s=%22']
+  006a: Add2
+  006b: Push ['_root']
+  0070: GetVariable
+  0071: Push ['speedmod']
+  0076: GetMember
+  0077: Add2
+  0078: Push ['%22/>\n']
+  007d: Add2
+  007e: Push [1, 'unescape']
+  0088: CallFunction
+  0089: SetVariable
+  008a: Push ['http://www.neodelight.com/cgi-bin/gravity/ac_long.cgi', 'this']
+  0091: GetVariable
+  0092: GetURL2 send_vars_method=1
+020a: End
+
+## sprite 162 frame 1
+0000: GotoFrame frame=194
+0005: Play
+0006: Push ['round', 1]
+0015: SetVariable
+0016: End
+
+## sprite 162 frame 2
+0000: ConstantPool ['cgiPusher', '_root', 'matches', 'matchesBlue', '_currentframe']
+0037: Push [0.0, 'cgiPusher']
+0045: CallFunction
+0046: Pop
+0047: Push ['_root']
+004c: GetVariable
+004d: Push ['matches']
+0052: GetMember
+0053: Push [2]
+005b: Divide
+005c: Push ['_root']
+0061: GetVariable
+0062: Push ['matchesBlue']
+0067: GetMember
+0068: Push ['_currentframe']
+006d: GetMember
+006e: Push [1]
+0076: Subtract
+0077: Less2
+0078: Not
+0079: If -> 132
+007e: GotoFrame frame=268
+0083: Play
+0084: End
+
+## sprite 162 label 'bluewin' frame 2
+
+## sprite 162 frame 30
+0000: Push [0.0, 'cgiPusherLong']
+001b: CallFunction
+001c: Pop
+001d: End
+
+## sprite 162 frame 97
+0000: GotoFrame frame=194
+0005: Play
+0006: End
+
+## sprite 162 frame 98
+0000: ConstantPool ['cgiPusher', '_root', 'matches', 'matchesRed', '_currentframe']
+0036: Push [0.0, 'cgiPusher']
+0044: CallFunction
+0045: Pop
+0046: Push ['_root']
+004b: GetVariable
+004c: Push ['matches']
+0051: GetMember
+0052: Push [2]
+005a: Divide
+005b: Push ['_root']
+0060: GetVariable
+0061: Push ['matchesRed']
+0066: GetMember
+0067: Push ['_currentframe']
+006c: GetMember
+006d: Push [1]
+0075: Subtract
+0076: Less2
+0077: Not
+0078: If -> 131
+007d: GotoFrame frame=431
+0082: Play
+0083: End
+
+## sprite 162 label 'redwin' frame 98
+
+## sprite 162 frame 129
+0000: Push [0.0, 'cgiPusherLong']
+001b: CallFunction
+001c: Pop
+001d: End
+
+## sprite 162 frame 194
+0000: GotoFrame frame=194
+0005: Play
+0006: End
+
+## sprite 162 frame 195
+0000: ConstantPool ['_root', 'w', 'scoreLeft', 'gotoAndStop', 'score2', 'score1']
+0031: Push [1, 1, '_root']
+0040: GetVariable
+0041: Push ['w']
+0046: GetMember
+0047: Push ['scoreLeft']
+004c: GetMember
+004d: Push ['gotoAndStop']
+0052: CallMethod
+0053: Pop
+0054: Push [1, 1, '_root']
+0063: GetVariable
+0064: Push ['w']
+0069: GetMember
+006a: Push ['score2']
+006f: GetMember
+0070: Push ['gotoAndStop']
+0075: CallMethod
+0076: Pop
+0077: Push ['_root']
+007c: GetVariable
+007d: Push ['score1', 0.0]
+008b: SetMember
+008c: Push ['_root']
+0091: GetVariable
+0092: Push ['score2', 0.0]
+00a0: SetMember
+00a1: End
+
+## sprite 162 label 'newgame' frame 195
+
+## sprite 162 frame 212
+0000: ConstantPool ['r', 'display', 'round']
+0015: Push ['r']
+001a: GetVariable
+001b: Push ['display', 'round']
+0022: GetVariable
+0023: SetMember
+0024: Push ['round', 'round']
+002b: GetVariable
+002c: Increment
+002d: SetVariable
+002e: End
+
+## sprite 162 frame 255
+0000: ConstantPool ['_root', 'w', 'pl1', 'gunReady', 'pl2']
+001e: Push ['_root']
+0023: GetVariable
+0024: Push ['w']
+0029: GetMember
+002a: Push ['pl1']
+002f: GetMember
+0030: Push ['gunReady', True]
+0037: SetMember
+0038: Push ['_root']
+003d: GetVariable
+003e: Push ['w']
+0043: GetMember
+0044: Push ['pl2']
+0049: GetMember
+004a: Push ['gunReady', True]
+0051: SetMember
+0052: End
+
+## sprite 162 frame 268
+0000: Stop
+0001: End
+
+## sprite 162 label 'bluefinal' frame 269
+
+## sprite 162 frame 300
+0000: Push [0.0, 'cgiPusherLong']
+001b: CallFunction
+001c: Pop
+001d: End
+
+## sprite 162 frame 430
+0000: Push ['menu', 1, '_root']
+0015: GetVariable
+0016: Push ['gotoAndStop']
+0026: CallMethod
+0027: Pop
+0028: End
+
+## sprite 162 label 'redfinal' frame 432
+
+## sprite 162 frame 463
+0000: Push [0.0, 'cgiPusherLong']
+001b: CallFunction
+001c: Pop
+001d: End
+
+## sprite 162 frame 588
+0000: Push ['menu', 1, '_root']
+0015: GetVariable
+0016: Push ['gotoAndStop']
+0026: CallMethod
+0027: Pop
+0028: End
+
+## sprite 163 frame 1
+0000: Stop
+0001: End
+
+## sprite 164 frame 1
+0000: Stop
+0001: End
