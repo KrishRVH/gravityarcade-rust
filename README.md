@@ -18,9 +18,9 @@ Controls:
 
 - Blue player, right side: `Up` / `Down`, fire with `Left`.
 - Red player, left side: `W` / `S`, fire with `D`.
-- Desktop presentation: `I` toggles `Interpolate`, which smooths continuous gameplay positions
-  between the SWF-faithful 30 Hz logic ticks without changing simulation, scoring, sounds, or
-  frame-timed animations.
+- Desktop presentation: `I` toggles `Interpolate`, which smooths continuous gameplay positions and
+  drawable scale/alpha/color fields between the SWF-faithful 30 Hz logic ticks without changing
+  simulation, scoring, sounds, or frame-timed animations.
 - Menu, help, and back navigation use the on-screen buttons, matching the SWF.
 
 ## Verification
@@ -108,10 +108,15 @@ color-region evidence, so the gate fails if those states collapse to a blank or 
 Important SWF-derived behavior and runtime choices:
 
 - World origin: `(273.45, 214.45)`.
-- The macroquad window is fixed at the SWF stage size `550x400`, with high-DPI and user resizing
-  disabled so stage coordinates map directly to pixels. The runtime also requests display refresh
-  pacing via miniquad `swap_interval = 1`, matching the curveball-rust macroquad shell pattern while
-  the simulation itself remains fixed at the SWF's `30 Hz`.
+- The macroquad window presents the SWF stage at `1650x1200` by default, using a camera transform so
+  simulation, hit testing, and rendering still operate in the original `550x400` stage coordinates.
+  The window is resizable; non-`11:8` sizes letterbox/pillarbox the stage instead of stretching it,
+  and mouse input is remapped through the visible stage viewport. High-DPI rendering is enabled so
+  Retina-style displays get a full-resolution backing framebuffer, and SWF-derived text/logo
+  textures are rasterized at the default window scale to avoid blurry upscaling on standard-density
+  displays. The runtime also requests display refresh pacing via miniquad `swap_interval = 1`,
+  matching the curveball-rust macroquad shell pattern while the simulation itself remains fixed at
+  the SWF's `30 Hz`.
 - Ball bounds: `x = -235..235`, `y = -170..170`.
 - Paddle bounds: `y = -150..150`, paddle half-height `30`.
 - Active paddle clips follow sprite `140`'s initial placements: blue starts at local y `-0.25`,
@@ -134,12 +139,13 @@ Important SWF-derived behavior and runtime choices:
   fixed-step accumulator, matching the curveball-rust runtime shell and preventing window stalls from
   fast-forwarding through a large backlog of SWF ticks.
 - The desktop-only `Interpolate` presentation toggle is enabled by default and can be switched with
-  `I`. It draws paddles, active balls, and scored-ball burst positions between the previous/current
-  fixed-tick snapshots at the display refresh cadence. The authoritative `World` still advances only
-  on the SWF's `30 Hz` tick, and score meters, charge clips, burn thresholds, sounds, match pips,
-  menu/help/startup frames, and sprite-162 announcements remain tick/frame exact. Debug screenshots
-  force the current fixed-tick snapshot, and the `Interpolate` notice is transient, so visual
-  regression captures stay comparable with Ruffle.
+  `I`. It draws paddle positions, paddle charge glow scale/tint, the ready overlay scale/alpha,
+  active ball positions/scale, and scored-ball burst positions/scale/alpha between the
+  previous/current fixed-tick snapshots at the display refresh cadence. The authoritative `World`
+  still advances only on the SWF's `30 Hz` tick, and score meters, burn thresholds, stun flashes,
+  sounds, match pips, menu/help/startup frames, and sprite-162 announcements remain tick/frame exact.
+  Debug screenshots force the current fixed-tick snapshot, and the `Interpolate` notice is
+  transient, so visual regression captures stay comparable with Ruffle.
 - Round intro gate: `60` ticks from the score-reset frame to the SWF `gunReady = true` frame.
   The visual `Round` + number display follows sprite 162's `newgame` timeline separately:
   it appears at frame `212`, is full-size/full-alpha from `225..255`, and fades/scales out

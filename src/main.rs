@@ -2,8 +2,8 @@
 
 use gravityarcade::sim::{
     BALL_CORE_RADIUS, BALL_FIRE_RADIUS, BALL_GLOW_RADIUS, Controls, DyingBall, GravityStrength,
-    Polarisation, ROUND_INTRO_VISUAL_TICKS, RoundEvent, SCORE_METER_MAX_FRAME, STAGE_H, STAGE_W,
-    Settings, Side, SpeedMode, TICK_HZ, World, paddle_charge_visual, paddle_stun_color,
+    Player, Polarisation, ROUND_INTRO_VISUAL_TICKS, RoundEvent, SCORE_METER_MAX_FRAME, STAGE_H,
+    STAGE_W, Settings, Side, SpeedMode, TICK_HZ, World, paddle_charge_visual, paddle_stun_color,
     score_meter_frame, world_to_stage,
 };
 use macroquad::audio::{PlaySoundParams, Sound, load_sound_from_bytes, play_sound};
@@ -43,6 +43,10 @@ use match_pip_shapes::{
 };
 
 const BG: Color = Color::new(0.0, 0.0, 0.20, 1.0);
+const DEFAULT_WINDOW_SCALE: f32 = 3.0;
+const DEFAULT_WINDOW_WIDTH: i32 = (STAGE_W as f32 * DEFAULT_WINDOW_SCALE) as i32;
+const DEFAULT_WINDOW_HEIGHT: i32 = (STAGE_H as f32 * DEFAULT_WINDOW_SCALE) as i32;
+const SWF_TEXTURE_RASTER_SCALE: f32 = 3.0;
 const PANEL: Color = swf_rgb_array(panel_chrome_shapes::PANEL_FILL_RGB);
 const PANEL_SHADOW: Color = swf_rgb_array(panel_chrome_shapes::PANEL_SHADOW_RGB);
 const STAGE_RED: Color = swf_rgb_array(panel_chrome_shapes::MASK_FILL_RGB);
@@ -359,6 +363,15 @@ struct RectVisual {
     y: f32,
     w: f32,
     h: f32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct StageViewport {
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+    scale: f32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -1360,30 +1373,94 @@ struct EntityVisualSnapshot {
     id: u32,
     x: f64,
     y: f64,
+    scale: f64,
+    alpha: f64,
 }
 
 impl EntityVisualSnapshot {
-    const fn from_ball(ball: gravityarcade::sim::Ball) -> Self {
+    fn from_ball(ball: gravityarcade::sim::Ball) -> Self {
         Self {
             id: ball.id,
             x: ball.x,
             y: ball.y,
+            scale: ball.visual_scale(),
+            alpha: 1.0,
         }
     }
 
-    const fn from_dying_ball(ball: DyingBall) -> Self {
+    fn from_dying_ball(ball: DyingBall) -> Self {
+        let visual = ball.visual();
         Self {
             id: ball.id,
             x: ball.x,
             y: ball.y,
+            scale: visual.scale,
+            alpha: visual.alpha,
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct PaddleVisualSnapshot {
+    y: f64,
+    glow_sx: f64,
+    glow_sy: f64,
+    glow_red: f64,
+    glow_green: f64,
+    glow_blue: f64,
+    ready_flash_scale: f64,
+    ready_flash_alpha: f64,
+}
+
+impl PaddleVisualSnapshot {
+    fn capture(player: &Player) -> Self {
+        let visual = paddle_charge_visual(player.side, player.energy_frame);
+        let (ready_flash_scale, ready_flash_alpha) = visual
+            .ready_flash
+            .map_or((1.0, 0.0), |flash| (flash.scale, flash.alpha));
+        Self {
+            y: player.y,
+            glow_sx: visual.sx,
+            glow_sy: visual.sy,
+            glow_red: f64::from(visual.color.0),
+            glow_green: f64::from(visual.color.1),
+            glow_blue: f64::from(visual.color.2),
+            ready_flash_scale,
+            ready_flash_alpha,
+        }
+    }
+
+    fn interpolate(self, current: Self, alpha: f64) -> Self {
+        Self {
+            y: lerp_f64(self.y, current.y, alpha),
+            glow_sx: lerp_f64(self.glow_sx, current.glow_sx, alpha),
+            glow_sy: lerp_f64(self.glow_sy, current.glow_sy, alpha),
+            glow_red: lerp_f64(self.glow_red, current.glow_red, alpha),
+            glow_green: lerp_f64(self.glow_green, current.glow_green, alpha),
+            glow_blue: lerp_f64(self.glow_blue, current.glow_blue, alpha),
+            ready_flash_scale: lerp_f64(self.ready_flash_scale, current.ready_flash_scale, alpha),
+            ready_flash_alpha: lerp_f64(self.ready_flash_alpha, current.ready_flash_alpha, alpha),
+        }
+    }
+
+    fn glow_color(self, stun_ticks: u32) -> Color {
+        if let Some(stun_rgb) = paddle_stun_color(stun_ticks) {
+            return color_from_rgb(stun_rgb);
+        }
+
+        Color::new(
+            (self.glow_red / 255.0) as f32,
+            (self.glow_green / 255.0) as f32,
+            (self.glow_blue / 255.0) as f32,
+            1.0,
+        )
     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 struct GameplayVisualSnapshot {
-    blue_y: f64,
-    red_y: f64,
+    blue: PaddleVisualSnapshot,
+    red: PaddleVisualSnapshot,
     balls: Vec<EntityVisualSnapshot>,
     dying_balls: Vec<EntityVisualSnapshot>,
 }
@@ -1391,8 +1468,8 @@ struct GameplayVisualSnapshot {
 impl GameplayVisualSnapshot {
     fn capture(world: &World) -> Self {
         Self {
-            blue_y: world.blue.y,
-            red_y: world.red.y,
+            blue: PaddleVisualSnapshot::capture(&world.blue),
+            red: PaddleVisualSnapshot::capture(&world.red),
             balls: world
                 .balls
                 .iter()
@@ -1411,25 +1488,25 @@ impl GameplayVisualSnapshot {
     fn interpolate(&self, current: &Self, alpha: f64) -> Self {
         let alpha = alpha.clamp(0.0, 1.0);
         Self {
-            blue_y: lerp_f64(self.blue_y, current.blue_y, alpha),
-            red_y: lerp_f64(self.red_y, current.red_y, alpha),
+            blue: self.blue.interpolate(current.blue, alpha),
+            red: self.red.interpolate(current.red, alpha),
             balls: interpolate_entities(&self.balls, &current.balls, alpha),
             dying_balls: interpolate_entities(&self.dying_balls, &current.dying_balls, alpha),
         }
     }
 
-    fn ball_position(&self, id: u32) -> Option<(f64, f64)> {
+    fn ball_visual(&self, id: u32) -> Option<EntityVisualSnapshot> {
         self.balls
             .iter()
             .find(|snapshot| snapshot.id == id)
-            .map(|snapshot| (snapshot.x, snapshot.y))
+            .copied()
     }
 
-    fn dying_ball_position(&self, id: u32) -> Option<(f64, f64)> {
+    fn dying_ball_visual(&self, id: u32) -> Option<EntityVisualSnapshot> {
         self.dying_balls
             .iter()
             .find(|snapshot| snapshot.id == id)
-            .map(|snapshot| (snapshot.x, snapshot.y))
+            .copied()
     }
 }
 
@@ -1448,6 +1525,8 @@ fn interpolate_entities(
                     id: current.id,
                     x: lerp_f64(previous.x, current.x, alpha),
                     y: lerp_f64(previous.y, current.y, alpha),
+                    scale: lerp_f64(previous.scale, current.scale, alpha),
+                    alpha: lerp_f64(previous.alpha, current.alpha, alpha),
                 })
         })
         .collect()
@@ -1617,7 +1696,7 @@ impl Game {
         reason = "Fixed-step accumulator loop follows the macroquad runtime shell pattern"
     )]
     fn update(&mut self) {
-        let (x, y) = mouse_position();
+        let (x, y) = stage_mouse_position();
         if is_key_pressed(INTERPOLATE_TOGGLE_KEY) {
             self.interpolate = !self.interpolate;
             self.interpolate_notice_frames = INTERPOLATE_NOTICE_FRAMES;
@@ -1684,6 +1763,12 @@ impl Game {
     }
 
     fn draw_with_interpolation_alpha(&self, interpolation_alpha: Option<f32>) {
+        let camera = stage_window_camera();
+        self.draw_with_stage_camera(&camera, interpolation_alpha);
+    }
+
+    fn draw_with_stage_camera(&self, camera: &Camera2D, interpolation_alpha: Option<f32>) {
+        set_camera(camera);
         clear_background(BG);
         match self.screen {
             Screen::Startup => self.draw_startup(),
@@ -1694,6 +1779,7 @@ impl Game {
         if self.interpolate_notice_frames > 0 {
             draw_interpolate_notice(self.interpolate);
         }
+        set_default_camera();
     }
 
     #[cfg(debug_assertions)]
@@ -1852,8 +1938,8 @@ impl Game {
         let world = &self.world;
         let visuals = self.gameplay_visuals(interpolation_alpha);
         draw_playfield(self.goal_flash);
-        draw_player_at(&world.blue, visuals.blue_y);
-        draw_player_at(&world.red, visuals.red_y);
+        draw_player_at(&world.blue, visuals.blue);
+        draw_player_at(&world.red, visuals.red);
         draw_attached_balls_in_depth_range(
             world,
             &visuals,
@@ -4502,7 +4588,7 @@ fn counter_digit_texture(
 }
 
 fn draw_header_link(link: HeaderLink, chrome_texts: &ChromeTextTextures) {
-    let (mouse_x, mouse_y) = mouse_position();
+    let (mouse_x, mouse_y) = stage_mouse_position();
     let state = header_link_state(
         link,
         mouse_x,
@@ -4622,8 +4708,8 @@ fn build_menu_label_texture(action: MenuAction) -> SwfTextTexture {
     let definition = menu_label_definition(action);
     debug_assert_eq!(definition.font_id, menu_label_texts::FONT_ID);
     let placement = menu_label_stage_bounds(action);
-    let width = placement.w.ceil().max(1.0) as u16;
-    let height = placement.h.ceil().max(1.0) as u16;
+    let width = swf_texture_extent(placement.w);
+    let height = swf_texture_extent(placement.h);
     let contours = menu_label_flattened_contours(definition);
     let sample_count = MENU_LABEL_TEXTURE_SUPERSAMPLE * MENU_LABEL_TEXTURE_SUPERSAMPLE;
     let color = definition.color_rgb;
@@ -4716,8 +4802,8 @@ fn build_menu_value_texture(
     text_placement: SwfTextPlacement,
 ) -> SwfTextTexture {
     let placement = menu_value_stage_bounds(definition, text_placement);
-    let width = placement.w.ceil().max(1.0) as u16;
-    let height = placement.h.ceil().max(1.0) as u16;
+    let width = swf_texture_extent(placement.w);
+    let height = swf_texture_extent(placement.h);
     let contours = menu_value_flattened_contours(definition);
     let sample_count = MENU_LABEL_TEXTURE_SUPERSAMPLE * MENU_LABEL_TEXTURE_SUPERSAMPLE;
     let mut pixels = vec![0; usize::from(width) * usize::from(height) * 4];
@@ -4864,8 +4950,8 @@ fn build_help_label_texture(
     text_placement: SwfTextPlacement,
 ) -> SwfTextTexture {
     let placement = help_label_stage_bounds(definition, text_placement);
-    let width = placement.w.ceil().max(1.0) as u16;
-    let height = placement.h.ceil().max(1.0) as u16;
+    let width = swf_texture_extent(placement.w);
+    let height = swf_texture_extent(placement.h);
     let sample_masks =
         help_label_sample_masks(definition, placement, text_placement, width, height);
     let sample_count =
@@ -5129,8 +5215,8 @@ fn build_chrome_text_texture(
     text_placement: SwfTextPlacement,
 ) -> SwfTextTexture {
     let placement = chrome_text_stage_bounds(definition, text_placement);
-    let width = placement.w.ceil().max(1.0) as u16;
-    let height = placement.h.ceil().max(1.0) as u16;
+    let width = swf_texture_extent(placement.w);
+    let height = swf_texture_extent(placement.h);
     let contours = chrome_text_flattened_contours(definition);
     let sample_count = CHROME_TEXT_TEXTURE_SUPERSAMPLE * CHROME_TEXT_TEXTURE_SUPERSAMPLE;
     let mut pixels = vec![0; usize::from(width) * usize::from(height) * 4];
@@ -5753,8 +5839,8 @@ fn build_top_title_texture() -> SwfTextTexture {
     debug_assert_eq!(top_title_text81::FONT_ID, 54);
     debug_assert_eq!(top_title_text81::DEFINE_TEXT_ID, 81);
     let placement = top_title_stage_bounds();
-    let width = placement.w.ceil().max(1.0) as u16;
-    let height = placement.h.ceil().max(1.0) as u16;
+    let width = swf_texture_extent(placement.w);
+    let height = swf_texture_extent(placement.h);
     let contours = top_title_flattened_contours();
     let sample_count = TOP_TITLE_TEXTURE_SUPERSAMPLE * TOP_TITLE_TEXTURE_SUPERSAMPLE;
     let mut pixels = vec![0; usize::from(width) * usize::from(height) * 4];
@@ -5883,8 +5969,8 @@ fn build_rounds_played_label_texture() -> SwfTextTexture {
     debug_assert_eq!(rounds_played_text77::FONT_ID, 26);
     debug_assert_eq!(rounds_played_text77::DEFINE_TEXT_ID, 77);
     let placement = rounds_played_label_stage_bounds();
-    let width = placement.w.ceil().max(1.0) as u16;
-    let height = placement.h.ceil().max(1.0) as u16;
+    let width = swf_texture_extent(placement.w);
+    let height = swf_texture_extent(placement.h);
     let contours = rounds_played_label_flattened_contours();
     let sample_count =
         ROUNDS_PLAYED_LABEL_TEXTURE_SUPERSAMPLE * ROUNDS_PLAYED_LABEL_TEXTURE_SUPERSAMPLE;
@@ -6047,8 +6133,8 @@ fn build_sponsor_logo_text_texture(
     transform: LogoRootTransform,
 ) -> SwfTextTexture {
     let placement = sponsor_logo_text_stage_bounds_at(definition, text_placement, transform);
-    let width = placement.w.ceil().max(1.0) as u16;
-    let height = placement.h.ceil().max(1.0) as u16;
+    let width = swf_texture_extent(placement.w);
+    let height = swf_texture_extent(placement.h);
     let contours = sponsor_logo_text_flattened_contours(definition);
     let sample_count =
         SPONSOR_LOGO_TEXT_TEXTURE_SUPERSAMPLE * SPONSOR_LOGO_TEXT_TEXTURE_SUPERSAMPLE;
@@ -6198,8 +6284,8 @@ fn sponsor_logo_text_contains_local(contours: &[Vec<SwfPoint>], local: SwfPoint)
 
 fn build_sponsor_logo_texture(transform: LogoRootTransform) -> SponsorLogoTexture {
     let placement = sponsor_logo_shape35_stage_bounds_at(transform);
-    let width = placement.w.ceil().max(1.0) as u16;
-    let height = placement.h.ceil().max(1.0) as u16;
+    let width = swf_texture_extent(placement.w);
+    let height = swf_texture_extent(placement.h);
     let contours = sponsor_logo_shape35_flattened_contours();
     let color = [
         color_channel_to_u8(SPONSOR_LOGO_FILL.r),
@@ -6749,16 +6835,18 @@ fn draw_attached_balls_in_depth_range(
     for depth in min_depth..max_depth {
         for ball in &world.balls {
             if ball.id == depth {
-                let (x, y) = visuals.ball_position(ball.id).unwrap_or((ball.x, ball.y));
-                draw_ball_at(*ball, x, y);
+                let visual = visuals
+                    .ball_visual(ball.id)
+                    .unwrap_or_else(|| EntityVisualSnapshot::from_ball(*ball));
+                draw_ball_at(*ball, visual.x, visual.y, visual.scale);
             }
         }
         for ball in &world.dying_balls {
             if ball.id == depth {
-                let (x, y) = visuals
-                    .dying_ball_position(ball.id)
-                    .unwrap_or((ball.x, ball.y));
-                draw_dying_ball_at(*ball, x, y);
+                let visual = visuals
+                    .dying_ball_visual(ball.id)
+                    .unwrap_or_else(|| EntityVisualSnapshot::from_dying_ball(*ball));
+                draw_dying_ball_at(visual.x, visual.y, visual.scale, visual.alpha);
             }
         }
     }
@@ -7286,24 +7374,26 @@ fn paddle_ready_flash_stage_point(scale: f32, local: SwfPoint) -> SwfPoint {
     SwfPoint::new(local.x * scale, local.y * scale)
 }
 
-fn draw_player_at(player: &gravityarcade::sim::Player, y: f64) {
+fn draw_player_at(player: &Player, visual: PaddleVisualSnapshot) {
     let x = match player.side {
         Side::Blue => gravityarcade::sim::RIGHT_PADDLE_X,
         Side::Red => gravityarcade::sim::LEFT_PADDLE_X,
     };
-    let (sx, sy) = world_to_stage(x, y);
+    let (sx, sy) = world_to_stage(x, visual.y);
     let sx = sx as f32;
     let sy = sy as f32;
-    let visual = paddle_charge_visual(player.side, player.energy_frame);
-    let glow_x = visual.sx as f32;
-    let glow_y = visual.sy as f32;
+    let glow_x = visual.glow_sx as f32;
+    let glow_y = visual.glow_sy as f32;
     let glow_center_y = sy + 0.25;
-    let glow = paddle_glow_color(player.stun_ticks, visual.color);
+    let glow = visual.glow_color(player.stun_ticks);
 
     draw_paddle_charge_glow(sx, glow_center_y, paddle_glow_visual(glow_x, glow_y, glow));
     draw_paddle_body(paddle_body_visual(sx, sy));
-    if let Some(flash) = visual.ready_flash.filter(|flash| flash.alpha > 0.0) {
-        let ready = paddle_ready_flash_visual(flash.scale as f32, flash.alpha as f32);
+    if visual.ready_flash_alpha > 0.0 {
+        let ready = paddle_ready_flash_visual(
+            visual.ready_flash_scale as f32,
+            visual.ready_flash_alpha as f32,
+        );
         let points: Vec<SwfPoint> = ready
             .points
             .iter()
@@ -7506,14 +7596,6 @@ fn paddle_glow_radial_alpha_at(ratio: f32) -> f32 {
     .clamp(0.0, 1.0)
 }
 
-fn paddle_glow_color(stun_ticks: u32, rgb: (u8, u8, u8)) -> Color {
-    if let Some(stun_rgb) = paddle_stun_color(stun_ticks) {
-        return color_from_rgb(stun_rgb);
-    }
-
-    color_from_rgb(rgb)
-}
-
 fn color_from_rgb(rgb: (u8, u8, u8)) -> Color {
     Color::new(
         f32::from(rgb.0) / 255.0,
@@ -7593,9 +7675,9 @@ fn dying_ball_ring_visual(scale: f32, alpha: f32) -> RadialRingVisual {
     }
 }
 
-fn draw_ball_at(ball: gravityarcade::sim::Ball, x: f64, y: f64) {
+fn draw_ball_at(ball: gravityarcade::sim::Ball, x: f64, y: f64, scale: f64) {
     let (sx, sy) = world_to_stage(x, y);
-    let scale = ball.visual_scale() as f32;
+    let scale = scale as f32;
     let sx = sx as f32;
     let sy = sy as f32;
 
@@ -7761,17 +7843,15 @@ fn radial_shape_stage_point(band: RadialShapeBand, local: SwfPoint, ratio: f32) 
     )
 }
 
-fn draw_dying_ball_at(ball: DyingBall, x: f64, y: f64) {
-    let visual = ball.visual();
-    if visual.alpha <= 0.0 {
+fn draw_dying_ball_at(x: f64, y: f64, scale: f64, alpha: f64) {
+    if alpha <= 0.0 {
         return;
     }
 
     let (sx, sy) = world_to_stage(x, y);
     let sx = sx as f32;
     let sy = sy as f32;
-    let alpha = visual.alpha as f32;
-    draw_radial_ring(sx, sy, dying_ball_ring_visual(visual.scale as f32, alpha));
+    draw_radial_ring(sx, sy, dying_ball_ring_visual(scale as f32, alpha as f32));
 }
 
 fn draw_round_intro(world: &World, announce_texts: &AnnounceTextTextures) {
@@ -8650,14 +8730,74 @@ fn capped_frame_time(raw_frame_time: f32) -> f64 {
     }
 }
 
+#[cfg(any(debug_assertions, test))]
+fn stage_render_target_camera() -> Camera2D {
+    Camera2D::from_display_rect(Rect::new(0.0, 0.0, STAGE_W as f32, STAGE_H as f32))
+}
+
+fn stage_window_camera() -> Camera2D {
+    stage_window_camera_for_screen(screen_width(), screen_height())
+}
+
+fn stage_window_camera_for_screen(screen_w: f32, screen_h: f32) -> Camera2D {
+    let mut camera = Camera2D::from_display_rect(stage_window_display_rect(screen_w, screen_h));
+    camera.zoom.y = -camera.zoom.y;
+    camera
+}
+
+fn stage_window_display_rect(screen_w: f32, screen_h: f32) -> Rect {
+    let screen_w = screen_w.max(1.0);
+    let screen_h = screen_h.max(1.0);
+    let viewport = stage_viewport(screen_w, screen_h);
+    let scale = viewport.scale.max(f32::EPSILON);
+    Rect::new(
+        -viewport.x / scale,
+        -viewport.y / scale,
+        screen_w / scale,
+        screen_h / scale,
+    )
+}
+
+fn stage_viewport(screen_w: f32, screen_h: f32) -> StageViewport {
+    let scale = (screen_w / STAGE_W as f32)
+        .min(screen_h / STAGE_H as f32)
+        .max(0.0);
+    let w = STAGE_W as f32 * scale;
+    let h = STAGE_H as f32 * scale;
+    StageViewport {
+        x: (screen_w - w) * 0.5,
+        y: (screen_h - h) * 0.5,
+        w,
+        h,
+        scale,
+    }
+}
+
+fn stage_mouse_position() -> (f32, f32) {
+    let (x, y) = mouse_position();
+    screen_point_to_stage(x, y, screen_width(), screen_height())
+}
+
+fn screen_point_to_stage(x: f32, y: f32, screen_w: f32, screen_h: f32) -> (f32, f32) {
+    let viewport = stage_viewport(screen_w.max(1.0), screen_h.max(1.0));
+    let scale = viewport.scale.max(f32::EPSILON);
+    ((x - viewport.x) / scale, (y - viewport.y) / scale)
+}
+
+fn swf_texture_extent(stage_extent: f32) -> u16 {
+    (stage_extent * SWF_TEXTURE_RASTER_SCALE)
+        .ceil()
+        .clamp(1.0, f32::from(u16::MAX)) as u16
+}
+
 fn window_conf() -> Conf {
     Conf {
         window_title: "Gravity Arcade".to_string(),
-        window_width: STAGE_W as i32,
-        window_height: STAGE_H as i32,
-        high_dpi: false,
+        window_width: DEFAULT_WINDOW_WIDTH,
+        window_height: DEFAULT_WINDOW_HEIGHT,
+        high_dpi: true,
         sample_count: 4,
-        window_resizable: false,
+        window_resizable: true,
         platform: miniquad::conf::Platform {
             swap_interval: Some(1),
             apple_gfx_api: miniquad::conf::AppleGfxApi::OpenGl,
@@ -8912,12 +9052,9 @@ async fn capture_debug_shot(game: &mut Game, shot: &DebugShot) {
     }
     let canvas = render_target(STAGE_W as u32, STAGE_H as u32);
     canvas.texture.set_filter(FilterMode::Nearest);
-    let mut camera =
-        Camera2D::from_display_rect(Rect::new(0.0, 0.0, STAGE_W as f32, STAGE_H as f32));
+    let mut camera = stage_render_target_camera();
     camera.render_target = Some(canvas.clone());
-    set_camera(&camera);
-    game.draw_with_interpolation_alpha(Some(1.0));
-    set_default_camera();
+    game.draw_with_stage_camera(&camera, Some(1.0));
     next_frame().await;
     canvas.texture.get_texture_data().export_png(&shot.path);
 }
@@ -8974,52 +9111,67 @@ mod tests {
     #[test]
     fn gameplay_visual_snapshots_interpolate_current_entities_only() {
         let previous = GameplayVisualSnapshot {
-            blue_y: 0.0,
-            red_y: 20.0,
+            blue: test_paddle_visual(0.0, 0.5),
+            red: test_paddle_visual(20.0, 0.0),
             balls: vec![EntityVisualSnapshot {
                 id: 10,
                 x: 0.0,
                 y: 10.0,
+                scale: 0.5,
+                alpha: 1.0,
             }],
             dying_balls: vec![
                 EntityVisualSnapshot {
                     id: 11,
                     x: 100.0,
                     y: 50.0,
+                    scale: 1.0,
+                    alpha: 1.0,
                 },
                 EntityVisualSnapshot {
                     id: 12,
                     x: 300.0,
                     y: 300.0,
+                    scale: 0.25,
+                    alpha: 0.5,
                 },
             ],
         };
         let current = GameplayVisualSnapshot {
-            blue_y: 10.0,
-            red_y: 0.0,
+            blue: test_paddle_visual(10.0, 1.0),
+            red: test_paddle_visual(0.0, 1.0),
             balls: vec![
                 EntityVisualSnapshot {
                     id: 10,
                     x: 30.0,
                     y: 40.0,
+                    scale: 1.0,
+                    alpha: 1.0,
                 },
                 EntityVisualSnapshot {
                     id: 13,
                     x: 70.0,
                     y: 90.0,
+                    scale: 0.75,
+                    alpha: 1.0,
                 },
             ],
             dying_balls: vec![EntityVisualSnapshot {
                 id: 11,
                 x: 80.0,
                 y: 70.0,
+                scale: 2.0,
+                alpha: 0.0,
             }],
         };
 
         let visuals = previous.interpolate(&current, 0.5);
 
-        assert_close_f64(visuals.blue_y, 5.0);
-        assert_close_f64(visuals.red_y, 10.0);
+        assert_close_f64(visuals.blue.y, 5.0);
+        assert_close_f64(visuals.blue.glow_sx, 0.75);
+        assert_close_f64(visuals.blue.glow_red, 15.0);
+        assert_close_f64(visuals.blue.ready_flash_alpha, 0.75);
+        assert_close_f64(visuals.red.y, 10.0);
         assert_eq!(
             visuals.balls,
             vec![
@@ -9027,11 +9179,15 @@ mod tests {
                     id: 10,
                     x: 15.0,
                     y: 25.0,
+                    scale: 0.75,
+                    alpha: 1.0,
                 },
                 EntityVisualSnapshot {
                     id: 13,
                     x: 70.0,
                     y: 90.0,
+                    scale: 0.75,
+                    alpha: 1.0,
                 },
             ]
         );
@@ -9041,6 +9197,8 @@ mod tests {
                 id: 11,
                 x: 90.0,
                 y: 60.0,
+                scale: 1.5,
+                alpha: 0.5,
             }]
         );
     }
@@ -9051,22 +9209,26 @@ mod tests {
         game.screen = Screen::Playing;
         game.accumulator = 0.5 / TICK_HZ;
         game.previous_visuals = GameplayVisualSnapshot {
-            blue_y: 0.0,
-            red_y: 0.0,
+            blue: test_paddle_visual(0.0, 0.5),
+            red: test_paddle_visual(0.0, 0.5),
             balls: vec![EntityVisualSnapshot {
                 id: 10,
                 x: 0.0,
                 y: 0.0,
+                scale: 0.5,
+                alpha: 1.0,
             }],
             dying_balls: Vec::new(),
         };
         game.current_visuals = GameplayVisualSnapshot {
-            blue_y: 20.0,
-            red_y: -20.0,
+            blue: test_paddle_visual(20.0, 1.0),
+            red: test_paddle_visual(-20.0, 1.0),
             balls: vec![EntityVisualSnapshot {
                 id: 10,
                 x: 100.0,
                 y: 50.0,
+                scale: 1.0,
+                alpha: 1.0,
             }],
             dying_balls: Vec::new(),
         };
@@ -9075,17 +9237,23 @@ mod tests {
 
         assert!(game.interpolate);
         let visuals = game.gameplay_visuals(None);
-        assert_close_f64(visuals.blue_y, 10.0);
-        assert_close_f64(visuals.red_y, -10.0);
-        assert_eq!(visuals.ball_position(10), Some((50.0, 25.0)));
+        assert_close_f64(visuals.blue.y, 10.0);
+        assert_close_f64(visuals.blue.glow_sx, 0.75);
+        assert_close_f64(visuals.red.y, -10.0);
+        let ball = visuals.ball_visual(10).expect("ball visual");
+        assert_close_f64(ball.x, 50.0);
+        assert_close_f64(ball.y, 25.0);
+        assert_close_f64(ball.scale, 0.75);
         assert_close_f64(game.world.blue.y, 20.0);
         assert_close_f64(game.world.red.y, -20.0);
 
         game.interpolate = false;
         let visuals = game.gameplay_visuals(None);
-        assert_close_f64(visuals.blue_y, 20.0);
-        assert_close_f64(visuals.red_y, -20.0);
-        assert_eq!(visuals.ball_position(10), Some((100.0, 50.0)));
+        assert_close_f64(visuals.blue.y, 20.0);
+        assert_close_f64(visuals.red.y, -20.0);
+        let ball = visuals.ball_visual(10).expect("ball visual");
+        assert_close_f64(ball.x, 100.0);
+        assert_close_f64(ball.y, 50.0);
     }
 
     #[cfg(debug_assertions)]
@@ -9344,6 +9512,19 @@ mod tests {
             (actual - expected).abs() < 0.000_001,
             "expected {actual} to be within 0.000001 of {expected}"
         );
+    }
+
+    fn test_paddle_visual(y: f64, value: f64) -> PaddleVisualSnapshot {
+        PaddleVisualSnapshot {
+            y,
+            glow_sx: value,
+            glow_sy: value,
+            glow_red: value * 20.0,
+            glow_green: value * 30.0,
+            glow_blue: value * 40.0,
+            ready_flash_scale: value,
+            ready_flash_alpha: value,
+        }
     }
 
     fn assert_color(actual: Color, expected: Color) {
@@ -9841,17 +10022,88 @@ mod tests {
     }
 
     #[test]
-    fn window_config_preserves_fixed_swf_stage() {
+    fn window_config_uses_high_resolution_stage_presentation() {
         let conf = window_conf();
-        assert_eq!(conf.window_width, 550);
-        assert_eq!(conf.window_height, 400);
-        assert!(!conf.high_dpi);
-        assert!(!conf.window_resizable);
+        assert_eq!(conf.window_width, 1650);
+        assert_eq!(conf.window_height, 1200);
+        assert!(conf.high_dpi);
+        assert!(conf.window_resizable);
         assert_eq!(conf.platform.swap_interval, Some(1));
         assert_eq!(
             conf.platform.apple_gfx_api,
             miniquad::conf::AppleGfxApi::OpenGl
         );
+    }
+
+    #[test]
+    fn stage_render_target_camera_preserves_swf_coordinate_space() {
+        let camera = stage_render_target_camera();
+        assert_close(camera.target.x, 275.0);
+        assert_close(camera.target.y, 200.0);
+        assert_close(camera.zoom.x, 2.0 / 550.0);
+        assert_close(camera.zoom.y, -2.0 / 400.0);
+    }
+
+    #[test]
+    fn stage_window_camera_keeps_stage_y_increasing_downward() {
+        let camera = stage_window_camera_for_screen(1650.0, 1200.0);
+        assert_eq!(camera.viewport, None);
+        assert_close(camera.target.x, 275.0);
+        assert_close(camera.target.y, 200.0);
+        assert_close(camera.zoom.x, 2.0 / 550.0);
+        assert_close(camera.zoom.y, 2.0 / 400.0);
+    }
+
+    #[test]
+    fn stage_window_display_rect_preserves_aspect_without_gl_viewport() {
+        let default = stage_window_display_rect(1650.0, 1200.0);
+        assert_close(default.x, 0.0);
+        assert_close(default.y, 0.0);
+        assert_close(default.w, 550.0);
+        assert_close(default.h, 400.0);
+
+        let wide = stage_window_display_rect(2000.0, 1200.0);
+        assert_close(wide.x, -58.333_332);
+        assert_close(wide.y, 0.0);
+        assert_close(wide.w, 666.666_7);
+        assert_close(wide.h, 400.0);
+
+        let tall = stage_window_display_rect(1650.0, 1400.0);
+        assert_close(tall.x, 0.0);
+        assert_close(tall.y, -33.333_332);
+        assert_close(tall.w, 550.0);
+        assert_close(tall.h, 466.666_66);
+    }
+
+    #[test]
+    fn stage_viewport_preserves_swf_aspect_ratio() {
+        let viewport = stage_viewport(2000.0, 1200.0);
+        assert_close(viewport.x, 175.0);
+        assert_close(viewport.y, 0.0);
+        assert_close(viewport.w, 1650.0);
+        assert_close(viewport.h, 1200.0);
+        assert_close(viewport.scale, 3.0);
+    }
+
+    #[test]
+    fn mouse_input_is_remapped_from_window_pixels_to_swf_stage_viewport() {
+        let (x, y) = screen_point_to_stage(550.0, 400.0, 1100.0, 800.0);
+        assert_close(x, 275.0);
+        assert_close(y, 200.0);
+
+        let (x, y) = screen_point_to_stage(1000.0, 600.0, 2000.0, 1200.0);
+        assert_close(x, 275.0);
+        assert_close(y, 200.0);
+
+        let (x, y) = screen_point_to_stage(1825.0, 1200.0, 2000.0, 1200.0);
+        assert_close(x, 550.0);
+        assert_close(y, 400.0);
+    }
+
+    #[test]
+    fn swf_textures_are_rasterized_at_default_window_scale() {
+        assert_close(SWF_TEXTURE_RASTER_SCALE, DEFAULT_WINDOW_SCALE);
+        assert_eq!(swf_texture_extent(10.0), 30);
     }
 
     #[test]

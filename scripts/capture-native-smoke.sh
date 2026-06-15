@@ -30,6 +30,7 @@ capture() {
     if [[ -n "$ticks" ]]; then
         shot="$shot:$ticks"
     fi
+    rm -f "$output"
     env "${capture_env[@]}" GRAVITYARCADE_WARP="$warp" GRAVITYARCADE_SHOT="$shot" "$BIN" >/dev/null
     echo "$output"
 }
