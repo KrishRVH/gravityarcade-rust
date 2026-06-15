@@ -138,6 +138,9 @@ const RED_DOWN_KEY: KeyCode = KeyCode::S;
 const RED_FIRE_KEY: KeyCode = KeyCode::D;
 const INTERPOLATE_TOGGLE_KEY: KeyCode = KeyCode::I;
 const INTERPOLATE_NOTICE_FRAMES: u8 = 60;
+const FPS_COUNTER_MARGIN: f32 = 8.0;
+const FPS_COUNTER_FONT_SIZE: u16 = 18;
+const FPS_COUNTER_BACKGROUND: Color = Color::new(0.0, 0.0, 0.0, 0.72);
 const MENU_BUTTON_SCALE: f32 = 0.671_630_86;
 const HELP_BACK_BUTTON_SCALE_X: f32 = 0.809_463_5;
 const HELP_BACK_BUTTON_SCALE_Y: f32 = 0.816_665_65;
@@ -1327,12 +1330,6 @@ enum Screen {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum StartupPhase {
-    Loading,
-    XmlWait,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MenuAction {
     Start,
     Help,
@@ -1545,7 +1542,6 @@ struct Game {
     goal_flash: GoalFlash,
     games_played: u32,
     startup_ticks: u32,
-    offline: bool,
     accumulator: f64,
     interpolate: bool,
     interpolate_notice_frames: u8,
@@ -1559,7 +1555,6 @@ struct Game {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ButtonSurface {
-    StartupAbort,
     Menu(MenuAction),
     HelpBack,
 }
@@ -1581,7 +1576,7 @@ enum ActionSurface {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum SurfaceTransition {
     MenuAction(MenuAction),
-    MenuImmediate { set_offline: bool },
+    MenuImmediate,
     ExternalLink(ExternalLinkAction),
 }
 
@@ -1599,7 +1594,6 @@ impl Game {
             goal_flash: GoalFlash::default(),
             games_played: 0,
             startup_ticks: 0,
-            offline: false,
             accumulator: 0.0,
             interpolate: true,
             interpolate_notice_frames: 0,
@@ -1639,12 +1633,7 @@ impl Game {
     fn activate_surface(&mut self, surface: ActionSurface) {
         match surface_transition(surface) {
             SurfaceTransition::MenuAction(action) => self.activate(action),
-            SurfaceTransition::MenuImmediate { set_offline } => {
-                if set_offline {
-                    self.offline = true;
-                }
-                self.screen = Screen::Menu;
-            },
+            SurfaceTransition::MenuImmediate => self.finish_startup_or_return_to_menu(),
             SurfaceTransition::ExternalLink(link) => open_external_link(link),
         }
     }
@@ -1671,6 +1660,12 @@ impl Game {
         let visuals = GameplayVisualSnapshot::capture(&self.world);
         self.previous_visuals = visuals.clone();
         self.current_visuals = visuals;
+    }
+
+    fn finish_startup_or_return_to_menu(&mut self) {
+        self.screen = Screen::Menu;
+        self.startup_ticks = STARTUP_MENU_TICK;
+        self.accumulator = 0.0;
     }
 
     fn gameplay_visuals(&self, forced_alpha: Option<f32>) -> GameplayVisualSnapshot {
@@ -1760,6 +1755,7 @@ impl Game {
 
     fn draw(&self) {
         self.draw_with_interpolation_alpha(None);
+        draw_fps_counter();
     }
 
     fn draw_with_interpolation_alpha(&self, interpolation_alpha: Option<f32>) {
@@ -1786,7 +1782,7 @@ impl Game {
     fn debug_fixed_tick(&mut self) {
         match self.screen {
             Screen::Startup => {
-                self.startup_ticks = self.startup_ticks.saturating_add(1);
+                self.advance_startup_tick();
             },
             Screen::Playing => {
                 self.previous_visuals = GameplayVisualSnapshot::capture(&self.world);
@@ -1813,21 +1809,24 @@ impl Game {
         self.accumulator += current_frame_time_step();
         let dt = 1.0 / TICK_HZ;
         while self.accumulator >= dt {
-            self.startup_ticks = self.startup_ticks.saturating_add(1);
             self.accumulator -= dt;
+            self.advance_startup_tick();
+            if self.screen != Screen::Startup {
+                break;
+            }
+        }
+    }
+
+    fn advance_startup_tick(&mut self) {
+        self.startup_ticks = self.startup_ticks.saturating_add(1);
+        if self.startup_ticks >= STARTUP_MENU_TICK {
+            self.finish_startup_or_return_to_menu();
         }
     }
 
     fn draw_startup(&self) {
         let assets = &self.assets;
-        match startup_phase(self.startup_ticks) {
-            StartupPhase::Loading => draw_startup_loading(assets.device_arial_font.as_ref()),
-            StartupPhase::XmlWait => draw_startup_xml_wait(
-                self.startup_ticks,
-                assets.device_arial_font.as_ref(),
-                assets.device_trebuchet_font.as_ref(),
-            ),
-        }
+        draw_startup_loading(assets.device_arial_font.as_ref());
     }
 
     fn draw_menu(&self) {
@@ -1862,7 +1861,7 @@ impl Game {
             counter_digits,
             assets.device_trebuchet_font.as_ref(),
             self.games_played,
-            rounds_played_clip_visible(Screen::Menu, self.offline),
+            rounds_played_clip_visible(Screen::Menu),
             version_footer_visible(Screen::Menu),
         );
         draw_playfield_mask();
@@ -1903,7 +1902,7 @@ impl Game {
             counter_digits,
             assets.device_trebuchet_font.as_ref(),
             self.games_played,
-            rounds_played_clip_visible(Screen::Help, self.offline),
+            rounds_played_clip_visible(Screen::Help),
             version_footer_visible(Screen::Help),
         );
         draw_playfield_mask();
@@ -2001,13 +2000,9 @@ impl GoalFlash {
 const fn surface_transition(surface: ActionSurface) -> SurfaceTransition {
     match surface {
         ActionSurface::Button(ButtonSurface::Menu(action)) => SurfaceTransition::MenuAction(action),
-        ActionSurface::Button(ButtonSurface::HelpBack) => {
-            SurfaceTransition::MenuImmediate { set_offline: false }
+        ActionSurface::Button(ButtonSurface::HelpBack) | ActionSurface::HeaderBack => {
+            SurfaceTransition::MenuImmediate
         },
-        ActionSurface::Button(ButtonSurface::StartupAbort) => {
-            SurfaceTransition::MenuImmediate { set_offline: true }
-        },
-        ActionSurface::HeaderBack => SurfaceTransition::MenuImmediate { set_offline: false },
         ActionSurface::ExternalLink(link) => SurfaceTransition::ExternalLink(link),
     }
 }
@@ -2343,12 +2338,8 @@ const HEADER_LINK_TEXT: SwfLineVisual = SwfLineVisual {
     font_size: 12,
 };
 const SWF_FILE_LEN_BYTES: usize = 84_367;
-const STARTUP_XML_WAIT_TICK: u32 = 2;
-const STARTUP_ABORT_BUTTON_FIRST_FRAME: u32 = 16;
-const STARTUP_ABORT_BUTTON_FULL_ALPHA_FRAME: u32 = 90;
+const STARTUP_MENU_TICK: u32 = 2;
 const STARTUP_GRAVITY_TEXT_VALUE: &str = "\"Gravity\"";
-const STARTUP_RETRIEVING_TEXT_VALUE: &str = "retrieving online data";
-const STARTUP_ABORT_LABEL: &str = "abort";
 const STARTUP_GRAVITY_TEXT: SwfCenterTextVisual = SwfCenterTextVisual {
     center_x: 275.0,
     baseline_y: 142.5,
@@ -2364,19 +2355,6 @@ const STARTUP_LOADING_PERCENT_TEXT: SwfCenterTextVisual = SwfCenterTextVisual {
     baseline_y: 236.95,
     font_size: 18,
 };
-const STARTUP_RETRIEVING_TEXT: SwfCenterTextVisual = SwfCenterTextVisual {
-    center_x: 275.0,
-    baseline_y: 190.5,
-    font_size: 18,
-};
-const STARTUP_ABORT_BUTTON_X: f32 = 274.45;
-const STARTUP_ABORT_BUTTON_Y: f32 = 233.05;
-const STARTUP_ABORT_BUTTON_SCALE: f32 = 0.671_630_86;
-const STARTUP_ABORT_LABEL_TEXT: SwfCenterTextVisual = SwfCenterTextVisual {
-    center_x: 292.88,
-    baseline_y: 238.49,
-    font_size: 11,
-};
 #[cfg(test)]
 const STARTUP_ARIAL_FONT_ID: u16 = 17;
 #[cfg(test)]
@@ -2386,21 +2364,7 @@ const STARTUP_PERCENT_DEFINE_EDIT_TEXT_ID: u16 = 19;
 #[cfg(test)]
 const STARTUP_GRAVITY_DEFINE_EDIT_TEXT_ID: u16 = 20;
 #[cfg(test)]
-const STARTUP_RETRIEVING_DEFINE_EDIT_TEXT_ID: u16 = 21;
-#[cfg(test)]
-const STARTUP_ABORT_BUTTON_ID: u16 = 25;
-#[cfg(test)]
-const STARTUP_ABORT_ROLLOVER_SOUND_ID: u16 = 23;
-#[cfg(test)]
-const STARTUP_ABORT_PRESS_SOUND_ID: u16 = 24;
-#[cfg(test)]
-const STARTUP_ABORT_LABEL_DEFINE_TEXT_ID: u16 = 27;
-#[cfg(test)]
-const STARTUP_ABORT_CLIP_ID: u16 = 29;
-#[cfg(test)]
 const SWF_GOTO_FRAME_ROOT_FRAME_OFFSET: u16 = 1;
-#[cfg(test)]
-const STARTUP_ABORT_GOTO_FRAME: u16 = 55;
 #[cfg(test)]
 const STARTUP_MENU_ROOT_FRAME: u16 = 56;
 #[cfg(test)]
@@ -3264,50 +3228,8 @@ fn swf_rgba_array(rgba: [u8; 4]) -> Color {
     )
 }
 
-fn startup_phase(ticks: u32) -> StartupPhase {
-    if ticks < STARTUP_XML_WAIT_TICK {
-        StartupPhase::Loading
-    } else {
-        StartupPhase::XmlWait
-    }
-}
-
-fn startup_xml_wait_frame(ticks: u32) -> u32 {
-    ticks.saturating_sub(STARTUP_XML_WAIT_TICK) + 1
-}
-
-fn startup_abort_button_alpha(ticks: u32) -> Option<f32> {
-    let frame = startup_xml_wait_frame(ticks);
-    if frame < STARTUP_ABORT_BUTTON_FIRST_FRAME {
-        return None;
-    }
-    if frame >= STARTUP_ABORT_BUTTON_FULL_ALPHA_FRAME {
-        return Some(1.0);
-    }
-    let fade_frame = frame - STARTUP_ABORT_BUTTON_FIRST_FRAME;
-    let fade_len = STARTUP_ABORT_BUTTON_FULL_ALPHA_FRAME - STARTUP_ABORT_BUTTON_FIRST_FRAME;
-    Some(((fade_frame * 256 + fade_len / 2) / fade_len) as f32 / 256.0)
-}
-
-fn startup_abort_button_visual() -> ButtonShapeVisual {
-    swf_button_visual(
-        STARTUP_ABORT_BUTTON_X,
-        STARTUP_ABORT_BUTTON_Y,
-        STARTUP_ABORT_BUTTON_SCALE,
-        STARTUP_ABORT_BUTTON_SCALE,
-    )
-}
-
-#[cfg(test)]
-fn startup_abort_button_contains(ticks: u32, x: f32, y: f32) -> bool {
-    startup_abort_button_alpha(ticks).is_some()
-        && button_shape_contains(startup_abort_button_visual(), x, y)
-}
-
 fn hovered_button(screen: Screen, buttons: &[Button], x: f32, y: f32) -> Option<ButtonSurface> {
     match screen {
-        Screen::Startup => button_shape_contains(startup_abort_button_visual(), x, y)
-            .then_some(ButtonSurface::StartupAbort),
         Screen::Menu => buttons
             .iter()
             .find(|button| button_shape_contains(button.visual, x, y))
@@ -3315,7 +3237,7 @@ fn hovered_button(screen: Screen, buttons: &[Button], x: f32, y: f32) -> Option<
         Screen::Help => {
             button_shape_contains(help_back_visual(), x, y).then_some(ButtonSurface::HelpBack)
         },
-        Screen::Playing => None,
+        Screen::Startup | Screen::Playing => None,
     }
 }
 
@@ -3377,19 +3299,12 @@ fn action_surface_at(
 
 fn hovered_button_with_startup_timing(
     screen: Screen,
-    startup_ticks: u32,
+    _startup_ticks: u32,
     buttons: &[Button],
     x: f32,
     y: f32,
 ) -> Option<ButtonSurface> {
-    let button = hovered_button(screen, buttons, x, y)?;
-    if matches!(button, ButtonSurface::StartupAbort)
-        && startup_abort_button_alpha(startup_ticks).is_none()
-    {
-        None
-    } else {
-        Some(button)
-    }
+    hovered_button(screen, buttons, x, y)
 }
 
 fn swf_release_action(
@@ -3462,36 +3377,6 @@ fn draw_startup_loading(device_arial_font: Option<&Font>) {
         STARTUP_TEXT,
         device_arial_font,
     );
-}
-
-fn draw_startup_xml_wait(
-    startup_ticks: u32,
-    device_arial_font: Option<&Font>,
-    device_trebuchet_font: Option<&Font>,
-) {
-    draw_swf_text_center(
-        STARTUP_RETRIEVING_TEXT_VALUE,
-        STARTUP_RETRIEVING_TEXT,
-        STARTUP_TEXT,
-        device_arial_font,
-    );
-    if let Some(alpha) = startup_abort_button_alpha(startup_ticks) {
-        let mut visual = startup_abort_button_visual();
-        visual.fill = color_with_alpha(visual.fill, alpha);
-        visual.outline = color_with_alpha(visual.outline, alpha);
-        draw_button_shape(visual);
-        draw_swf_text_center(
-            STARTUP_ABORT_LABEL,
-            STARTUP_ABORT_LABEL_TEXT,
-            color_with_alpha(SWF_WHITE, alpha),
-            device_trebuchet_font,
-        );
-    }
-}
-
-fn color_with_alpha(mut color: Color, alpha: f32) -> Color {
-    color.a *= alpha;
-    color
 }
 
 fn draw_stage_frame_with_flash(options: StageFrameOptions, goal_flash: GoalFlash) {
@@ -4432,10 +4317,9 @@ fn draw_footer(
     }
 }
 
-fn rounds_played_clip_visible(screen: Screen, offline: bool) -> bool {
+const fn rounds_played_clip_visible(screen: Screen) -> bool {
     match screen {
-        Screen::Menu => !offline,
-        Screen::Help => true,
+        Screen::Menu | Screen::Help => true,
         Screen::Startup | Screen::Playing => false,
     }
 }
@@ -8718,6 +8602,31 @@ fn draw_interpolate_notice(enabled: bool) {
     );
 }
 
+fn draw_fps_counter() {
+    let label = format!("FPS {}", get_fps());
+    let measured = measure_text(&label, None, FPS_COUNTER_FONT_SIZE, 1.0);
+    let font_size = f32::from(FPS_COUNTER_FONT_SIZE);
+    let x = FPS_COUNTER_MARGIN;
+    let y = FPS_COUNTER_MARGIN + font_size;
+    draw_rectangle(
+        x - 4.0,
+        y - font_size - 4.0,
+        measured.width + 8.0,
+        font_size + 8.0,
+        FPS_COUNTER_BACKGROUND,
+    );
+    draw_text_ex(
+        &label,
+        x,
+        y,
+        TextParams {
+            font_size: FPS_COUNTER_FONT_SIZE,
+            color: TEXT,
+            ..Default::default()
+        },
+    );
+}
+
 fn current_frame_time_step() -> f64 {
     capped_frame_time(get_frame_time())
 }
@@ -8840,8 +8749,8 @@ fn parse_debug_shot_spec(spec: &str) -> (&str, u32) {
 }
 
 #[cfg(debug_assertions)]
-const DEBUG_WARP_EXPECTED: &str = "startup, xml_wait, menu, offline_menu, \
-menu_polarisation_opposite, menu_polarisation_same, menu_polarisation_all, menu_matches_5, \
+const DEBUG_WARP_EXPECTED: &str = "startup, menu, menu_polarisation_opposite, \
+menu_polarisation_same, menu_polarisation_all, menu_matches_5, \
 menu_matches_7, menu_matches_1, menu_gravity_low, menu_gravity_high, menu_gravity_very_high, \
 menu_gravity_black_hole, menu_speed_fast, help, playing_idle, playing, playing_red, score_ramps, \
 score_max, round_intro_1, round_intro, blue_win, red_win, blue_final, or red_final";
@@ -8866,17 +8775,8 @@ fn apply_debug_warp_from_env(game: &mut Game) {
 fn apply_debug_warp(game: &mut Game, warp: &str) {
     match warp {
         "startup" => {},
-        "xml_wait" => {
-            game.screen = Screen::Startup;
-            game.startup_ticks = STARTUP_XML_WAIT_TICK;
-        },
         "menu" => {
             game.screen = Screen::Menu;
-            game.offline = false;
-        },
-        "offline_menu" => {
-            game.screen = Screen::Menu;
-            game.offline = true;
         },
         "menu_polarisation_opposite" => {
             apply_debug_menu_setting(game, |settings| {
@@ -8989,7 +8889,6 @@ fn apply_debug_warp(game: &mut Game, warp: &str) {
 #[cfg(debug_assertions)]
 fn apply_debug_menu_setting(game: &mut Game, configure: impl FnOnce(&mut Settings)) {
     game.screen = Screen::Menu;
-    game.offline = false;
     game.settings = Settings::default();
     configure(&mut game.settings);
 }
@@ -9292,57 +9191,46 @@ mod tests {
 
         apply_debug_warp(&mut game, "menu_polarisation_opposite");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.polarisation, Polarisation::OppositeRepels);
 
         apply_debug_warp(&mut game, "menu_polarisation_same");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.polarisation, Polarisation::SameRepels);
 
         apply_debug_warp(&mut game, "menu_polarisation_all");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.polarisation, Polarisation::AllRepel);
 
         apply_debug_warp(&mut game, "menu_matches_5");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.matches, 5);
 
         apply_debug_warp(&mut game, "menu_matches_7");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.matches, 7);
 
         apply_debug_warp(&mut game, "menu_matches_1");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.matches, 1);
 
         apply_debug_warp(&mut game, "menu_gravity_low");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.gravity, GravityStrength::G1);
 
         apply_debug_warp(&mut game, "menu_gravity_high");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.gravity, GravityStrength::G3);
 
         apply_debug_warp(&mut game, "menu_gravity_very_high");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.gravity, GravityStrength::G4);
 
         apply_debug_warp(&mut game, "menu_gravity_black_hole");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.gravity, GravityStrength::G5);
 
         apply_debug_warp(&mut game, "menu_speed_fast");
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
         assert_eq!(game.settings.speed, SpeedMode::Fast);
     }
 
@@ -9569,6 +9457,31 @@ mod tests {
             bytes[offset + 2],
             bytes[offset + 3],
         ])
+    }
+
+    fn wav_data_bytes(bytes: &[u8]) -> &[u8] {
+        assert!(bytes.starts_with(b"RIFF"));
+        assert_eq!(&bytes[8..12], b"WAVE");
+        let mut offset = 12;
+        while offset + 8 <= bytes.len() {
+            let chunk_id = &bytes[offset..offset + 4];
+            let chunk_len = read_le_u32(bytes, offset + 4) as usize;
+            let data_start = offset + 8;
+            let data_end = data_start + chunk_len;
+            assert!(data_end <= bytes.len());
+            if chunk_id == b"data" {
+                return &bytes[data_start..data_end];
+            }
+            offset = data_end + (chunk_len & 1);
+        }
+        panic!("WAV data chunk should exist");
+    }
+
+    fn wav_first_nonzero_frame(bytes: &[u8]) -> usize {
+        wav_data_bytes(bytes)
+            .chunks_exact(2)
+            .position(|sample| i16::from_le_bytes([sample[0], sample[1]]) != 0)
+            .expect("runtime WAV should contain nonzero audio")
     }
 
     fn swf_first_tag_offset(bytes: &[u8]) -> usize {
@@ -11444,12 +11357,10 @@ mod tests {
         assert_eq!(ROUNDS_PLAYED_CLIP_ID, 79);
         assert_eq!(ROUNDS_PLAYED_HELP_CLIP_ID, 119);
         assert_eq!(SWF_VISIBLE_PROPERTY_INDEX, 7);
-        assert!(rounds_played_clip_visible(Screen::Menu, false));
-        assert!(!rounds_played_clip_visible(Screen::Menu, true));
-        assert!(rounds_played_clip_visible(Screen::Help, false));
-        assert!(rounds_played_clip_visible(Screen::Help, true));
-        assert!(!rounds_played_clip_visible(Screen::Startup, false));
-        assert!(!rounds_played_clip_visible(Screen::Playing, false));
+        assert!(rounds_played_clip_visible(Screen::Menu));
+        assert!(rounds_played_clip_visible(Screen::Help));
+        assert!(!rounds_played_clip_visible(Screen::Startup));
+        assert!(!rounds_played_clip_visible(Screen::Playing));
         assert!(version_footer_visible(Screen::Menu));
         assert!(version_footer_visible(Screen::Help));
         assert!(!version_footer_visible(Screen::Startup));
@@ -11732,24 +11643,8 @@ mod tests {
     fn button_hover_surfaces_match_swf_define_button_sound_records() {
         let buttons = menu_buttons();
         assert_eq!(
-            hovered_button_with_startup_timing(
-                Screen::Startup,
-                STARTUP_XML_WAIT_TICK + STARTUP_ABORT_BUTTON_FIRST_FRAME - 2,
-                &buttons,
-                STARTUP_ABORT_BUTTON_X,
-                STARTUP_ABORT_BUTTON_Y
-            ),
+            hovered_button(Screen::Startup, &buttons, 266.0, 63.35),
             None
-        );
-        assert_eq!(
-            hovered_button_with_startup_timing(
-                Screen::Startup,
-                STARTUP_XML_WAIT_TICK + STARTUP_ABORT_BUTTON_FIRST_FRAME - 1,
-                &buttons,
-                STARTUP_ABORT_BUTTON_X,
-                STARTUP_ABORT_BUTTON_Y
-            ),
-            Some(ButtonSurface::StartupAbort)
         );
         assert_eq!(
             hovered_button(Screen::Menu, &buttons, 266.0, 63.35),
@@ -11873,57 +11768,25 @@ mod tests {
             interactive_surface_at(Screen::Startup, 0, &buttons, 508.65, 17.4),
             None
         );
-
         assert_eq!(
-            interactive_surface_at(
-                Screen::Startup,
-                STARTUP_XML_WAIT_TICK + STARTUP_ABORT_BUTTON_FIRST_FRAME - 2,
-                &buttons,
-                STARTUP_ABORT_BUTTON_X,
-                STARTUP_ABORT_BUTTON_Y
-            ),
+            interactive_surface_at(Screen::Startup, STARTUP_MENU_TICK, &buttons, 266.0, 348.5),
             None
-        );
-        assert_eq!(
-            interactive_surface_at(
-                Screen::Startup,
-                STARTUP_XML_WAIT_TICK + STARTUP_ABORT_BUTTON_FIRST_FRAME - 1,
-                &buttons,
-                STARTUP_ABORT_BUTTON_X,
-                STARTUP_ABORT_BUTTON_Y
-            ),
-            Some(InteractiveSurface::Button)
         );
     }
 
     #[test]
-    fn startup_preloader_and_xml_abort_follow_swf_root_frames() {
+    fn startup_preloader_skips_online_wait_and_enters_menu() {
         let buttons = menu_buttons();
-        let first_abort_tick = STARTUP_XML_WAIT_TICK + STARTUP_ABORT_BUTTON_FIRST_FRAME - 1;
-        let full_abort_tick = STARTUP_XML_WAIT_TICK + STARTUP_ABORT_BUTTON_FULL_ALPHA_FRAME - 1;
 
         assert_eq!(STARTUP_ARIAL_FONT_ID, 17);
         assert_eq!(STARTUP_TITLE_DEFINE_EDIT_TEXT_ID, 18);
         assert_eq!(STARTUP_PERCENT_DEFINE_EDIT_TEXT_ID, 19);
         assert_eq!(STARTUP_GRAVITY_DEFINE_EDIT_TEXT_ID, 20);
-        assert_eq!(STARTUP_RETRIEVING_DEFINE_EDIT_TEXT_ID, 21);
-        assert_eq!(STARTUP_ABORT_BUTTON_ID, 25);
-        assert_eq!(STARTUP_ABORT_ROLLOVER_SOUND_ID, 23);
-        assert_eq!(STARTUP_ABORT_PRESS_SOUND_ID, 24);
-        assert_eq!(STARTUP_ABORT_LABEL_DEFINE_TEXT_ID, 27);
-        assert_eq!(STARTUP_ABORT_CLIP_ID, 29);
         assert_eq!(SWF_GOTO_FRAME_ROOT_FRAME_OFFSET, 1);
-        assert_eq!(STARTUP_ABORT_GOTO_FRAME, 55);
         assert_eq!(STARTUP_MENU_ROOT_FRAME, 56);
-        assert_eq!(
-            swf_goto_frame_root_frame(STARTUP_ABORT_GOTO_FRAME),
-            STARTUP_MENU_ROOT_FRAME
-        );
+        assert_eq!(swf_goto_frame_root_frame(55), STARTUP_MENU_ROOT_FRAME);
         assert_eq!(STARTUP_DEVICE_FALLBACK_FONT_NAME, "Liberation Sans");
-
-        assert_eq!(startup_phase(0), StartupPhase::Loading);
-        assert_eq!(startup_phase(1), StartupPhase::Loading);
-        assert_eq!(startup_phase(STARTUP_XML_WAIT_TICK), StartupPhase::XmlWait);
+        assert_eq!(STARTUP_MENU_TICK, 2);
         assert_eq!(
             startup_loading_title_text(SWF_FILE_LEN_BYTES),
             "loading 82 kbyte..."
@@ -11933,8 +11796,6 @@ mod tests {
             "100 %"
         );
         assert_eq!(STARTUP_GRAVITY_TEXT_VALUE, "\"Gravity\"");
-        assert_eq!(STARTUP_RETRIEVING_TEXT_VALUE, "retrieving online data");
-        assert_eq!(STARTUP_ABORT_LABEL, "abort");
 
         assert_swf_point(
             SwfPoint::new(
@@ -11944,77 +11805,17 @@ mod tests {
             275.03,
             191.95,
         );
-        assert_swf_point(
-            SwfPoint::new(
-                STARTUP_RETRIEVING_TEXT.center_x,
-                STARTUP_RETRIEVING_TEXT.baseline_y,
-            ),
-            275.0,
-            190.5,
-        );
-
-        assert_eq!(startup_abort_button_alpha(first_abort_tick - 1), None);
-        assert_close(
-            startup_abort_button_alpha(first_abort_tick)
-                .expect("abort button should exist on sprite 29 frame 16"),
-            0.0,
-        );
-        assert_close(
-            startup_abort_button_alpha(first_abort_tick + 1)
-                .expect("abort button should fade in on sprite 29 frame 17"),
-            3.0 / 256.0,
-        );
-        assert_close(
-            startup_abort_button_alpha(full_abort_tick)
-                .expect("abort button should be fully opaque on sprite 29 frame 90"),
-            1.0,
-        );
-
-        let abort_button = startup_abort_button_visual();
-        assert_swf_point(
-            abort_button.center,
-            STARTUP_ABORT_BUTTON_X,
-            STARTUP_ABORT_BUTTON_Y,
-        );
-        assert_rect(abort_button.rect, 229.82, 224.32, 89.29, 17.46);
-        assert!(startup_abort_button_contains(
-            first_abort_tick,
-            STARTUP_ABORT_BUTTON_X,
-            STARTUP_ABORT_BUTTON_Y
-        ));
         assert_eq!(
-            swf_release_action(
-                action_surface_at(
-                    Screen::Startup,
-                    first_abort_tick,
-                    &buttons,
-                    STARTUP_ABORT_BUTTON_X,
-                    STARTUP_ABORT_BUTTON_Y
-                ),
-                action_surface_at(
-                    Screen::Startup,
-                    first_abort_tick,
-                    &buttons,
-                    STARTUP_ABORT_BUTTON_X,
-                    STARTUP_ABORT_BUTTON_Y
-                )
-            ),
-            Some(ActionSurface::Button(ButtonSurface::StartupAbort))
-        );
-        assert_eq!(
-            action_surface_at(
-                Screen::Startup,
-                first_abort_tick - 1,
-                &buttons,
-                STARTUP_ABORT_BUTTON_X,
-                STARTUP_ABORT_BUTTON_Y
-            ),
+            action_surface_at(Screen::Startup, STARTUP_MENU_TICK, &buttons, 266.0, 348.5),
             None
         );
-        assert_eq!(
-            surface_transition(ActionSurface::Button(ButtonSurface::StartupAbort)),
-            SurfaceTransition::MenuImmediate { set_offline: true }
-        );
+
+        let mut game = Game::new(AudioBank::default(), GameAssets::new(None, None, None));
+        game.advance_startup_tick();
+        assert_eq!(game.screen, Screen::Startup);
+        game.advance_startup_tick();
+        assert_eq!(game.screen, Screen::Menu);
+        assert_eq!(game.startup_ticks, STARTUP_MENU_TICK);
     }
 
     #[test]
@@ -12144,7 +11945,7 @@ mod tests {
         );
         assert_eq!(
             surface_transition(help_back),
-            SurfaceTransition::MenuImmediate { set_offline: false }
+            SurfaceTransition::MenuImmediate
         );
         assert_eq!(
             swf_release_action(
@@ -12160,11 +11961,7 @@ mod tests {
         );
         assert_eq!(
             surface_transition(header_back),
-            SurfaceTransition::MenuImmediate { set_offline: false }
-        );
-        assert_eq!(
-            surface_transition(ActionSurface::Button(ButtonSurface::StartupAbort)),
-            SurfaceTransition::MenuImmediate { set_offline: true }
+            SurfaceTransition::MenuImmediate
         );
         assert_eq!(
             swf_release_action(
@@ -12194,7 +11991,6 @@ mod tests {
         game.mouse_pressed(268.0, 349.2);
         game.mouse_released(268.0, 349.2);
         assert_eq!(game.screen, Screen::Menu);
-        assert!(!game.offline);
 
         game.screen = Screen::Help;
         game.mouse_pressed(9.0, 12.0);
@@ -12206,15 +12002,7 @@ mod tests {
         game.mouse_released(9.0, 12.0);
         assert_eq!(game.screen, Screen::Menu);
 
-        game.screen = Screen::Startup;
-        game.startup_ticks = STARTUP_XML_WAIT_TICK + STARTUP_ABORT_BUTTON_FULL_ALPHA_FRAME - 1;
-        game.mouse_pressed(STARTUP_ABORT_BUTTON_X, STARTUP_ABORT_BUTTON_Y);
-        game.mouse_released(STARTUP_ABORT_BUTTON_X, STARTUP_ABORT_BUTTON_Y);
-        assert_eq!(game.screen, Screen::Menu);
-        assert!(game.offline);
-
         game.screen = Screen::Menu;
-        game.offline = false;
         game.mouse_pressed(266.0, 348.5);
         game.mouse_dragged(500.0, 350.0);
         assert_eq!(game.screen, Screen::Playing);
@@ -14083,7 +13871,7 @@ mod tests {
                 assert_eq!(
                     bytes.len(),
                     $byte_len,
-                    "DefineSound {} ({}) should match the native WAV conversion size",
+                    "DefineSound {} ({}) should match the generated runtime WAV size",
                     $sound_id,
                     $name
                 );
@@ -14093,20 +13881,26 @@ mod tests {
                     $sound_id,
                     $name
                 );
+                assert!(
+                    wav_first_nonzero_frame(bytes) <= 2,
+                    "DefineSound {} ({}) should not keep MP3 seek-sample silence",
+                    $sound_id,
+                    $name
+                );
             }};
         }
 
-        assert_swf_wav_asset!(1, "reflect", 21_966);
+        assert_swf_wav_asset!(1, "reflect", 18_610);
         assert_swf_wav_asset!(6, "merge", 6_700);
-        assert_swf_wav_asset!(12, "shot", 11_564);
-        assert_swf_wav_asset!(23, "sound_23", 9_260);
-        assert_swf_wav_asset!(24, "sound_24", 30_030);
-        assert_swf_wav_asset!(85, "score_line", 13_902);
+        assert_swf_wav_asset!(12, "shot", 8_298);
+        assert_swf_wav_asset!(23, "sound_23", 5_938);
+        assert_swf_wav_asset!(24, "sound_24", 26_674);
+        assert_swf_wav_asset!(85, "score_line", 10_546);
         assert_swf_wav_asset!(131, "paddle_stun", 27_944);
-        assert_swf_wav_asset!(149, "round_lost", 39_212);
+        assert_swf_wav_asset!(149, "round_lost", 35_946);
         assert_swf_wav_asset!(156, "round_start", 28_618);
-        assert_swf_wav_asset!(159, "blue_match_win", 50_766);
-        assert_swf_wav_asset!(161, "red_match_win", 48_462);
+        assert_swf_wav_asset!(159, "blue_match_win", 47_466);
+        assert_swf_wav_asset!(161, "red_match_win", 45_162);
 
         let swf = include_bytes!("../gravity_arcade.swf");
         let mut start_sound_infos = Vec::new();
@@ -14384,10 +14178,7 @@ async fn main() {
     }
     game.audio = AudioBank::load().await;
     if game.screen == Screen::Startup {
-        for _ in 0..2 {
-            game.draw();
-            next_frame().await;
-        }
+        game.finish_startup_or_return_to_menu();
     }
     loop {
         game.update();

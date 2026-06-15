@@ -17,13 +17,19 @@ find "$WAV_DIR" -maxdepth 1 -type f -name '*.wav' -delete
 find "$RUNTIME_WAV_DIR" -maxdepth 1 -type f -name '*.wav' -delete
 
 PYTHONDONTWRITEBYTECODE=1 python3 - <<'PY'
-from reference.apply_sound_info_to_wavs import envelope_levels
+from pathlib import Path
+
+from reference.apply_sound_info_to_wavs import collect_mp3_seek_samples, envelope_levels
 
 levels = envelope_levels(((4, 16384, 8192), (8, 32768, 32768)), 10, 44_100)
 assert levels[0] == (0.5, 0.25)
 assert levels[4] == (0.5, 0.25)
 assert levels[6] == (0.75, 0.625)
 assert levels[9] == (1.0, 1.0)
+
+seek_samples = collect_mp3_seek_samples(Path("gravity_arcade.swf").read_bytes())
+assert seek_samples[12] == 1633
+assert seek_samples[23] == 1661
 PY
 
 python3 reference/extract_sounds.py gravity_arcade.swf --out "$MP3_DIR" --manifest "$MP3_MANIFEST" >/dev/null

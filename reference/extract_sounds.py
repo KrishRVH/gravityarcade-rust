@@ -3,7 +3,8 @@
 
 Flash MP3 DefineSound data starts with a signed UI16 seek-samples value before
 the first MP3 frame. Runtime audio players expect the frame stream only, so the
-extractor strips those two bytes and writes normal `.mp3` files.
+extractor strips those two bytes and writes normal `.mp3` files. The runtime WAV
+asset step reads the SWF again and applies the skipped-sample trim after decode.
 """
 
 from __future__ import annotations

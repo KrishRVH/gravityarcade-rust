@@ -10,8 +10,8 @@ are verified by `scripts/verify-desktop-release.sh --with-reference`.
 - Runtime presentation includes the desktop-only `Interpolate` toggle, enabled by default and
   switchable with `I`. It smooths continuous gameplay positions between the previous/current
   fixed-tick snapshots while leaving the authoritative `World`, collisions, scoring, sounds, score
-  meters, charge clips, menu/help/startup frames, and sprite-162 announcements on the SWF-faithful
-  30 Hz tick. Debug screenshots force the current fixed-tick snapshot for stable reference
+  meters, charge clips, menu/help frames, and sprite-162 announcements on the SWF-faithful 30 Hz
+  tick. Debug screenshots force the current fixed-tick snapshot for stable reference
   comparisons.
 - The menu and instruction copy are recovered from decoded SWF text records, with placement checked
   against SWF frame data and Ruffle screenshots. The menu button captions, menu setting values, and
@@ -20,8 +20,8 @@ are verified by `scripts/verify-desktop-release.sh --with-reference`.
   from recovered glyph contours, and the round-number edit text uses recovered embedded contours for
   digits `1`, `2`, and `3`. The `rounds played` counter uses recovered font-26 digit contours for
   embedded digits `0` through `8`, even in mixed values such as `19`; only the non-embedded digit
-  `9` uses SWF device-font text. The startup loading/XML-wait fields, menu `g.factor` field, and
-  that counter `9` now prefer installed `Arial`, `Times New Roman`, and `Trebuchet MS` files, use
+  `9` uses SWF device-font text. The startup loading fields, menu `g.factor` field, and that
+  counter `9` now prefer installed `Arial`, `Times New Roman`, and `Trebuchet MS` files, use
   common Linux desktop substitutes such as Liberation Sans/Serif, Carlito, and Caladea when those
   named Microsoft fonts are unavailable, and finally fall back to bundled Liberation Sans/Serif.
   Those fallback cases are still substitutes rather than exact recovered device-font glyph data.
@@ -43,12 +43,10 @@ are verified by `scripts/verify-desktop-release.sh --with-reference`.
   overlay outline cycles are regenerated into `src/score_meter_constants.rs`; the native smoke gate
   now captures partial-ramp, max-meter overlay, round-intro, non-final win, and final-win
   announcement states with color-region assertions for regression evidence.
-- The original online CGI logging/data endpoints remain intentionally inert in the Rust port; the
-  startup screen exposes the recovered SWF offline abort branch rather than contacting them. That
-  branch sets `offline = true` and executes raw `GotoFrame 55; Play`; because `ActionGotoFrame` is
-  zero-based, it lands directly on the frame-56 menu whose `Stop` action prevents any extra logo
-  transition.
+- The original online CGI logging/data endpoints are removed from the Rust runtime. Startup keeps
+  the local loading text while assets initialize, then enters the frame-56 menu directly instead of
+  showing the recovered `retrieving online data` wait or offline abort branch.
 - Native builds use WAV runtime assets because `quad-snd` decodes WAV/OGG locally.
-  `scripts/verify-sound-assets.sh` now regenerates those WAVs from `gravity_arcade.swf`, applies the
-  SWF `SoundInfo` in/out/envelope records for runtime cues, and verifies them byte-for-byte against
-  the checked-in runtime assets.
+  `scripts/verify-sound-assets.sh` now regenerates those WAVs from `gravity_arcade.swf`, trims the
+  SWF MP3 seek-sample delay, applies the SWF `SoundInfo` in/out/envelope records for runtime cues,
+  and verifies them byte-for-byte against the checked-in runtime assets.

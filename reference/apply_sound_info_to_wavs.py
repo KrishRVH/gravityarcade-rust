@@ -14,6 +14,7 @@ from typing import Iterator
 
 DEFINE_SPRITE = 39
 DEFINE_BUTTON_SOUND = 17
+DEFINE_SOUND = 14
 SHOW_FRAME = 1
 START_SOUND = 15
 END = 0
@@ -176,6 +177,19 @@ def collect_start_sound_infos(data: bytes) -> dict[tuple[int | None, int, int], 
     return infos
 
 
+def collect_mp3_seek_samples(data: bytes) -> dict[int, int]:
+    seek_samples = {}
+    for tag in iter_tags(data, first_tag_offset(data), len(data)):
+        if tag.code != DEFINE_SOUND:
+            continue
+        sound_id = struct.unpack_from("<H", tag.body, 0)[0]
+        flags = tag.body[2]
+        sound_format = (flags >> 4) & 0x0F
+        if sound_format == 2:
+            seek_samples[sound_id] = struct.unpack_from("<h", tag.body, 7)[0]
+    return seek_samples
+
+
 def collect_button_sound_infos(data: bytes) -> dict[tuple[int, str], tuple[int, SoundInfo]]:
     infos = {}
     for tag in iter_tags(data, first_tag_offset(data), len(data)):
@@ -258,8 +272,14 @@ def clamp_i16(value: float) -> int:
     return max(-32_768, min(32_767, round(value)))
 
 
-def apply_sound_info(input_wav: Path, output_wav: Path, sound_info: SoundInfo | None) -> None:
-    if sound_info is None or not sound_info.has_runtime_transform:
+def apply_sound_info(
+    input_wav: Path,
+    output_wav: Path,
+    sound_info: SoundInfo | None,
+    seek_samples: int,
+) -> None:
+    seek_samples = max(0, seek_samples)
+    if seek_samples == 0 and (sound_info is None or not sound_info.has_runtime_transform):
         shutil.copyfile(input_wav, output_wav)
         return
 
@@ -267,31 +287,35 @@ def apply_sound_info(input_wav: Path, output_wav: Path, sound_info: SoundInfo | 
         channels = source.getnchannels()
         sample_width = source.getsampwidth()
         sample_rate = source.getframerate()
-        sample_count = source.getnframes()
-        frames = source.readframes(sample_count)
+        source_sample_count = source.getnframes()
+        frames = source.readframes(source_sample_count)
 
     if sample_width != 2:
         raise SystemExit(f"{input_wav}: expected 16-bit WAV, got {sample_width * 8}-bit")
 
+    seek_samples = min(source_sample_count, seek_samples)
+    sample_count = source_sample_count - seek_samples
     start = 0
     end = sample_count
-    if sound_info.in_point_44100 is not None:
+    if sound_info is not None and sound_info.in_point_44100 is not None:
         start = mark_to_sample(sound_info.in_point_44100, sample_rate)
-    if sound_info.out_point_44100 is not None:
+    if sound_info is not None and sound_info.out_point_44100 is not None:
         end = mark_to_sample(sound_info.out_point_44100, sample_rate)
     start = max(0, min(sample_count, start))
     end = max(start, min(sample_count, end))
 
     samples = list(struct.unpack("<" + "h" * (len(frames) // 2), frames))
-    levels = envelope_levels(sound_info.envelope, sample_count, sample_rate)
+    envelope = sound_info.envelope if sound_info is not None else ()
+    levels = envelope_levels(envelope, sample_count, sample_rate)
     processed: list[int] = []
     for sample_index in range(start, end):
+        source_sample_index = seek_samples + sample_index
         left_level, right_level = levels[sample_index]
         if channels == 1:
             level = (left_level + right_level) / 2.0
-            processed.append(clamp_i16(samples[sample_index] * level))
+            processed.append(clamp_i16(samples[source_sample_index] * level))
         elif channels == 2:
-            base = sample_index * 2
+            base = source_sample_index * 2
             processed.append(clamp_i16(samples[base] * left_level))
             processed.append(clamp_i16(samples[base + 1] * right_level))
         else:
@@ -313,6 +337,7 @@ def main() -> None:
     args = parser.parse_args()
 
     swf = args.swf.read_bytes()
+    seek_samples = collect_mp3_seek_samples(swf)
     start_infos = collect_start_sound_infos(swf)
     button_infos = collect_button_sound_infos(swf)
     args.out.mkdir(parents=True, exist_ok=True)
@@ -326,6 +351,7 @@ def main() -> None:
             args.raw_dir / f"{runtime_name}.wav",
             args.out / f"{runtime_name}.wav",
             sound_info,
+            seek_samples.get(sound_id, 0),
         )
 
 

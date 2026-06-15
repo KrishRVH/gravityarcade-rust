@@ -37,10 +37,7 @@ capture() {
 
 captures=()
 captures+=("$(capture startup startup)")
-captures+=("$(capture xml-wait xml_wait)")
-captures+=("$(capture xml-abort xml_wait 90)")
 captures+=("$(capture menu menu)")
-captures+=("$(capture offline-menu offline_menu)")
 captures+=("$(capture menu-polarisation-opposite menu_polarisation_opposite)")
 captures+=("$(capture menu-polarisation-same menu_polarisation_same)")
 captures+=("$(capture menu-polarisation-all menu_polarisation_all)")

@@ -57,9 +57,9 @@ players' fired-ball playfield PNGs plus browser console/network logs to `target/
 needs the gstack `browse` binary and network access for the pinned Ruffle web player. The comparison
 script captures both the original SWF-through-Ruffle and the native macroquad smoke frames, then
 checks their image deltas against antialias-tolerant thresholds.
-The startup/loading/offline-abort frames are covered by native smoke captures; the Ruffle reference
-harness reaches the stopped menu before browser navigation returns, and its manual-play overlay is
-not suitable for deterministic startup-frame capture.
+The startup/loading frame is covered by native smoke captures; the Ruffle reference harness reaches
+the stopped menu before browser navigation returns, and its manual-play overlay is not suitable for
+deterministic startup-frame capture.
 
 Debug-only deterministic screenshots are available for visual parity checks:
 
@@ -68,12 +68,12 @@ GRAVITYARCADE_WARP=menu GRAVITYARCADE_SHOT=target/debug/gravityarcade-menu.png c
 GRAVITYARCADE_WARP=help GRAVITYARCADE_SHOT=target/debug/gravityarcade-help.png cargo run
 ```
 
-`GRAVITYARCADE_WARP` accepts `startup`, `xml_wait`, `menu`, `offline_menu`,
-`menu_polarisation_opposite`, `menu_polarisation_same`, `menu_polarisation_all`, `menu_matches_5`,
-`menu_matches_7`, `menu_matches_1`, `menu_gravity_low`, `menu_gravity_high`,
-`menu_gravity_very_high`, `menu_gravity_black_hole`, `menu_speed_fast`, `help`, `playing_idle`,
-`playing`, `playing_red`, `score_ramps`, `score_max`, `round_intro_1`, `round_intro`, `blue_win`,
-`red_win`, `blue_final`, and `red_final`.
+`GRAVITYARCADE_WARP` accepts `startup`, `menu`, `menu_polarisation_opposite`,
+`menu_polarisation_same`, `menu_polarisation_all`, `menu_matches_5`, `menu_matches_7`,
+`menu_matches_1`, `menu_gravity_low`, `menu_gravity_high`, `menu_gravity_very_high`,
+`menu_gravity_black_hole`, `menu_speed_fast`, `help`, `playing_idle`, `playing`, `playing_red`,
+`score_ramps`, `score_max`, `round_intro_1`, `round_intro`, `blue_win`, `red_win`, `blue_final`,
+and `red_final`.
 Append `:ticks` to `GRAVITYARCADE_SHOT` to advance fixed SWF ticks before capture.
 The smoke script captures the key native screens to `target/debug/visual-smoke/` and validates that
 each PNG is a nonblank `550x400` SWF-stage image, including score-meter and sprite-162
@@ -89,8 +89,9 @@ color-region evidence, so the gate fails if those states collapse to a blank or 
   shared fill boundaries, and optional reconstructed fill contours.
 - `reference/extract_sounds.py`: extracts the original SWF MP3 `DefineSound` streams.
 - `scripts/verify-sound-assets.sh`: extracts the original SWF MP3 `DefineSound` streams, converts
-  them to native WAV assets, applies the SWF `SoundInfo` in/out/envelope records used by runtime
-  cues, and compares them plus `reference/sounds.json` to the checked-in files.
+  them to native WAV assets, trims the SWF MP3 seek-sample delay, applies the SWF `SoundInfo`
+  in/out/envelope records used by runtime cues, and compares them plus `reference/sounds.json` to
+  the checked-in files.
 - `scripts/verify-generated-assets.sh`: regenerates checked-in SWF contour/placement/score-meter
   modules from `gravity_arcade.swf` plus `reference/swf_deep.json`, formats them, and compares them
   to `src/`.
@@ -99,7 +100,7 @@ color-region evidence, so the gate fails if those states collapse to a blank or 
 - `reference/swf_deep.json`: visual tag, shape, text, and placement dump from the curveball-rust parser.
 - `reference/sounds.json`: extracted sound manifest.
 - `assets/sounds/`: runtime WAV assets used by macroquad's native decoder, regenerated from the
-  original SWF sound streams plus SWF `SoundInfo` cue metadata.
+  original SWF sound streams plus SWF MP3 seek-sample and `SoundInfo` cue metadata.
 - `assets/fonts/`: bundled fallbacks for SWF edit text with no embedded glyph outlines. At runtime
   the port first tries common installed `Arial`, `Times New Roman`, and `Trebuchet MS` font paths,
   then common Linux-compatible substitutes such as Liberation Sans/Serif, Carlito, and Caladea,
@@ -128,13 +129,9 @@ Important SWF-derived behavior and runtime choices:
   paddle center still reflects.
 - Player input preserves sprite `132`'s key bindings: blue uses `Up`/`Down`/`Left`; red uses
   `W`/`S`/`D`. Menu and back navigation stay mouse-driven like the original button records.
-- Startup follows the SWF root pre-menu frames: frame 1 initializes `offline = false`; frame 2 uses
-  the original loading edit fields and menu defaults (`matches = 3`, neutral polarisation, gravity
-  strength 2, normal speed); frame 3 shows the `retrieving online data` wait field and sprite 29's
-  fading `abort` button. Because the Rust port intentionally keeps the original CGI endpoints inert,
-  releasing over `abort` follows the SWF offline path by setting `offline = true`, then using raw
-  `GotoFrame 55; Play`; `ActionGotoFrame` is zero-based, so this lands on the frame-56 menu whose
-  `Stop` action prevents any extra logo transition.
+- Startup keeps the local loading edit fields while assets initialize, then enters the frame-56 menu
+  directly. The original SWF's `retrieving online data` CGI wait and offline abort branch are not
+  present in the Rust runtime.
 - Fixed gameplay tick: `30 Hz`; macroquad frame deltas are capped at `250 ms` before entering the
   fixed-step accumulator, matching the curveball-rust runtime shell and preventing window stalls from
   fast-forwarding through a large backlog of SWF ticks.
@@ -143,7 +140,7 @@ Important SWF-derived behavior and runtime choices:
   active ball positions/scale, and scored-ball burst positions/scale/alpha between the
   previous/current fixed-tick snapshots at the display refresh cadence. The authoritative `World`
   still advances only on the SWF's `30 Hz` tick, and score meters, burn thresholds, stun flashes,
-  sounds, match pips, menu/help/startup frames, and sprite-162 announcements remain tick/frame exact.
+  sounds, match pips, menu/help frames, and sprite-162 announcements remain tick/frame exact.
   Debug screenshots force the current fixed-tick snapshot, and the `Interpolate` notice is
   transient, so visual regression captures stay comparable with Ruffle.
 - Round intro gate: `60` ticks from the score-reset frame to the SWF `gunReady = true` frame.
@@ -164,12 +161,9 @@ Important SWF-derived behavior and runtime choices:
   `Trebuchet MS` and embeds digits `0` through `8`; those digits render from recovered contours,
   while the non-embedded digit `9` alone uses installed `Trebuchet MS` when available, Linux
   desktop substitutes such as Carlito/Liberation Sans next, and bundled Liberation Sans as the final
-  local fallback. Root frame 56's
-  `roundsPlayed` clip load handler hides that clip when `offline == true`, so after the startup
-  abort path the menu omits the counter while keeping the rest of the footer chrome. Frame 57 removes
-  that clip and places a visible counter clone at the same depth, so the help screen shows the counter
-  even after the offline abort path. Frame 57 keeps depth 44's version/`:neokolor` link sprite on the
-  help screen, while frame 58 removes it for gameplay.
+  local fallback. The Rust runtime always shows the menu/help `rounds played` counter because the
+  removed offline startup branch is no longer a reachable state. Frame 57 keeps depth 44's
+  version/`:neokolor` link sprite on the help screen, while frame 58 removes it for gameplay.
 - The menu top `g.factor` `DefineEditText` field displays the current gravity factor
   `10`/`17`/`50`/`120`/`210` at its root-frame placement. The SWF names font `71` as
   `Times New Roman` with zero embedded glyphs, so the port uses installed `Times New Roman` when
@@ -274,10 +268,11 @@ Important SWF-derived behavior and runtime choices:
   sound `12`, reflect bounces use sprite 16's `Sound("reflect").start()` object for sound `1`,
   merge sprite 8 frame `2` starts sound `6`, goal-line flash sprites `86`/`88`/`125`/`126` frame
   `2` start sound `85`, and sprite 132 frame `4` starts sound `131` when a burning score sends the
-  defender to `paralised`. Runtime WAV assets bake in the SWF `SoundInfo` in/out points and envelope
-  levels for the merge, shot, rollover, paddle-stun, round-lost, and round-start cues.
-- Button sounds follow `DefineButtonSound`: startup `abort` button `25`, menu buttons, and the help
-  screen's bottom `back` button play sound `23` on rollover and sound `24` on mouse down. Visible
+  defender to `paralised`. Runtime WAV assets trim the SWF MP3 seek-sample delay and bake in the SWF
+  `SoundInfo` in/out points and envelope levels for the merge, shot, rollover, paddle-stun,
+  round-lost, and round-start cues.
+- Button sounds follow `DefineButtonSound`: menu buttons and the help screen's bottom `back` button
+  play sound `23` on rollover and sound `24` on mouse down. Visible
   SWF button/link actions follow their recovered `overDownToOverUp` handlers, so they activate only
   when the mouse is released over the same hit area that was pressed; the bottom `single match`
   start button also mirrors button `39`'s `overDownToOutDown` handler, starting the match if the

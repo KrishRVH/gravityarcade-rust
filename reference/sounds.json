@@ -10,7 +10,7 @@
     "samples": 8175,
     "sprite": null,
     "frame": 1,
-    "bytes": 21966
+    "bytes": 18610
   },
   {
     "id": 6,
@@ -36,7 +36,7 @@
     "samples": 3989,
     "sprite": null,
     "frame": 1,
-    "bytes": 11564
+    "bytes": 8298
   },
   {
     "id": 23,
@@ -49,7 +49,7 @@
     "samples": 1938,
     "sprite": null,
     "frame": 3,
-    "bytes": 9260
+    "bytes": 5938
   },
   {
     "id": 24,
@@ -62,7 +62,7 @@
     "samples": 12352,
     "sprite": null,
     "frame": 3,
-    "bytes": 30030
+    "bytes": 26674
   },
   {
     "id": 85,
@@ -75,7 +75,7 @@
     "samples": 4006,
     "sprite": null,
     "frame": 56,
-    "bytes": 13902
+    "bytes": 10546
   },
   {
     "id": 131,
@@ -101,7 +101,7 @@
     "samples": 16768,
     "sprite": null,
     "frame": 58,
-    "bytes": 39212
+    "bytes": 35946
   },
   {
     "id": 156,
@@ -127,7 +127,7 @@
     "samples": 22569,
     "sprite": null,
     "frame": 58,
-    "bytes": 50766
+    "bytes": 47466
   },
   {
     "id": 161,
@@ -140,6 +140,6 @@
     "samples": 21510,
     "sprite": null,
     "frame": 58,
-    "bytes": 48462
+    "bytes": 45162
   }
 ]
